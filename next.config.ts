@@ -11,13 +11,6 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
     ],
   },
-  // Allow build to complete even if eslint package peer is missing
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: false,
-  },
 };
 
 export default nextConfig;

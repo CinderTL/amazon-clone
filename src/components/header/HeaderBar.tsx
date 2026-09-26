@@ -3,7 +3,6 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
 import { Menu, Search, ShoppingCart, Store } from "lucide-react";
 import { CategoriesOverlay } from "@/components/categories/CategoriesOverlay";
 import { NotificationMenu } from "@/components/header/NotificationMenu";
@@ -74,6 +73,32 @@ function BecomeSellerLink({ href, className }: { href: string; className?: strin
   );
 }
 
+function CategoriesButton({
+  className,
+  expanded,
+  onOpen,
+}: {
+  className?: string;
+  expanded: boolean;
+  onOpen: (button: HTMLButtonElement) => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={cn(
+        "lx-focus inline-flex items-center gap-2 rounded-full px-2 py-2 text-sm font-semibold hover:bg-[var(--bg-page)] sm:px-3",
+        className
+      )}
+      aria-expanded={expanded}
+      aria-controls="categories-overlay"
+      onClick={(event) => onOpen(event.currentTarget)}
+    >
+      <Menu className="h-5 w-5 shrink-0" aria-hidden />
+      <span className="truncate">Categories</span>
+    </button>
+  );
+}
+
 function AccountSlot({ user }: { user: HeaderUser | null }) {
   if (!user) {
     return (
@@ -102,39 +127,25 @@ export function HeaderBar({
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const categoriesButtonRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
+  const [pathSnapshot, setPathSnapshot] = useState(pathname);
   const showBecomeSeller = !user || !user.isSeller;
   const becomeHref = user ? "/become-seller" : "/login?next=/become-seller";
 
-  useEffect(() => {
-    setCategoriesOpen(false);
-  }, [pathname]);
+  if (pathname !== pathSnapshot) {
+    setPathSnapshot(pathname);
+    if (categoriesOpen) setCategoriesOpen(false);
+  }
 
-  function CategoriesButton({ className }: { className?: string }) {
-    return (
-      <button
-        type="button"
-        className={cn(
-          "lx-focus inline-flex items-center gap-2 rounded-full px-2 py-2 text-sm font-semibold hover:bg-[var(--bg-page)] sm:px-3",
-          className
-        )}
-        aria-expanded={categoriesOpen}
-        aria-controls="categories-overlay"
-        onClick={(event) => {
-          categoriesButtonRef.current = event.currentTarget;
-          setCategoriesOpen(true);
-        }}
-      >
-        <Menu className="h-5 w-5" aria-hidden />
-        Categories
-      </button>
-    );
+  function openCategories(button: HTMLButtonElement) {
+    categoriesButtonRef.current = button;
+    setCategoriesOpen(true);
   }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--bg)]/95 backdrop-blur-md">
       <div className="hidden h-16 items-center gap-4 px-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:px-8">
         <div className="justify-self-start">
-          <CategoriesButton />
+          <CategoriesButton expanded={categoriesOpen} onOpen={openCategories} />
         </div>
         <div className="flex items-center gap-3">
           <Logo />
@@ -150,21 +161,25 @@ export function HeaderBar({
 
       <div className="space-y-2 px-3 py-2 lg:hidden">
         <div className="relative flex h-12 items-center">
-          <CategoriesButton />
-          <div className="pointer-events-none absolute left-1/2 flex -translate-x-1/2 items-center gap-1">
+          <CategoriesButton
+            expanded={categoriesOpen}
+            onOpen={openCategories}
+            className="relative z-10 max-w-[42%]"
+          />
+          <div className="pointer-events-none absolute left-1/2 -translate-x-1/2">
             <span className="pointer-events-auto">
               <Logo />
             </span>
-            <span className="pointer-events-auto">
-              <CartLink count={cartCount} />
-            </span>
           </div>
-          <div className="ml-auto flex items-center gap-1">
+          <div className="relative z-10 ml-auto flex items-center gap-1">
             <NotificationMenu notifications={notifications} signedIn={Boolean(user)} />
             <AccountSlot user={user} />
           </div>
         </div>
-        <SearchForm />
+        <div className="flex items-center gap-2">
+          <SearchForm className="min-w-0 flex-1" />
+          <CartLink count={cartCount} />
+        </div>
         {showBecomeSeller && <BecomeSellerLink href={becomeHref} className="w-full" />}
       </div>
 

@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 type PopoverProps = {
   label: string;
   trigger: React.ReactNode;
-  children: React.ReactNode | ((close: () => void) => React.ReactNode);
+  children: React.ReactNode;
   align?: "start" | "end";
   triggerClassName?: string;
   panelClassName?: string;
@@ -28,7 +28,9 @@ export function Popover({
   const panelRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
 
-  function close() {
+  function closeFromSelection(event: React.MouseEvent<HTMLDivElement>) {
+    const target = event.target as HTMLElement;
+    if (!target.closest("a, button")) return;
     setOpen(false);
     buttonRef.current?.focus();
   }
@@ -92,13 +94,14 @@ export function Popover({
           id={panelId}
           role={panelRole}
           aria-label={label}
+          onClick={closeFromSelection}
           className={cn(
             "lx-pop absolute top-[calc(100%+0.5rem)] z-[70] min-w-56 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-1.5 text-[var(--text)] shadow-[var(--shadow)]",
             align === "end" ? "right-0" : "left-0",
             panelClassName
           )}
         >
-          {typeof children === "function" ? children(close) : children}
+          {children}
         </div>
       )}
     </div>

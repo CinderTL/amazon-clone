@@ -23,27 +23,26 @@ export function CategoriesOverlay({
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const [selectedSlug, setSelectedSlug] = useState(DEFAULT_CATEGORY_SLUG);
-  const [mounted, setMounted] = useState(false);
+  const [trackedOpen, setTrackedOpen] = useState(open);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!open) return;
-    const match = categories.find((category) => category.slug === DEFAULT_CATEGORY_SLUG);
-    setSelectedSlug(match?.slug ?? categories[0]?.slug ?? "");
-  }, [open, categories]);
+  if (open !== trackedOpen) {
+    setTrackedOpen(open);
+    if (open) {
+      const match = categories.find((category) => category.slug === DEFAULT_CATEGORY_SLUG);
+      setSelectedSlug(match?.slug ?? categories[0]?.slug ?? DEFAULT_CATEGORY_SLUG);
+    }
+  }
 
   useEffect(() => {
     if (!open) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const frame = requestAnimationFrame(() => closeRef.current?.focus());
+    const returnFocus = returnFocusRef?.current ?? null;
     return () => {
       cancelAnimationFrame(frame);
       document.body.style.overflow = previous;
-      returnFocusRef?.current?.focus();
+      returnFocus?.focus();
     };
   }, [open, returnFocusRef]);
 
@@ -75,7 +74,7 @@ export function CategoriesOverlay({
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  if (!open || !mounted) return null;
+  if (!open || typeof document === "undefined") return null;
 
   const selected = categories.find((category) => category.slug === selectedSlug) ?? categories[0];
 

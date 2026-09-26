@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark" | "system";
 
@@ -11,48 +11,47 @@ type ThemeContextValue = {
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
+const THEME_EVENT = "lixazon-theme";
 
-function resolveTheme(theme: Theme): "light" | "dark" {
-  if (theme === "system") {
-    if (typeof window === "undefined") return "light";
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  }
-  return theme;
+function isTheme(value: string | null): value is Theme {
+  return value === "light" || value === "dark" || value === "system";
+}
+
+function subscribeTheme(onStoreChange: () => void) {
+  window.addEventListener(THEME_EVENT, onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+  return () => {
+    window.removeEventListener(THEME_EVENT, onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+  };
+}
+
+function themeSnapshot(): Theme {
+  const stored = localStorage.getItem("lixazon-theme");
+  return isTheme(stored) ? stored : "system";
+}
+
+function subscribeSystemDark(onStoreChange: () => void) {
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  media.addEventListener("change", onStoreChange);
+  return () => media.removeEventListener("change", onStoreChange);
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("system");
-  const [resolved, setResolved] = useState<"light" | "dark">("light");
+  const theme = useSyncExternalStore(subscribeTheme, themeSnapshot, () => "system" as Theme);
+  const systemDark = useSyncExternalStore(subscribeSystemDark, () => window.matchMedia("(prefers-color-scheme: dark)").matches, () => false);
+  const resolved = theme === "system" ? (systemDark ? "dark" : "light") : theme;
 
   useEffect(() => {
-    const stored = localStorage.getItem("lixazon-theme") as Theme | null;
-    if (stored === "light" || stored === "dark" || stored === "system") {
-      setThemeState(stored);
-    }
-  }, []);
-
-  useEffect(() => {
-    const next = resolveTheme(theme);
-    setResolved(next);
-    document.documentElement.classList.toggle("dark", next === "dark");
-  }, [theme]);
-
-  useEffect(() => {
-    if (theme !== "system") return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => setResolved(mq.matches ? "dark" : "light");
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, [theme]);
+    document.documentElement.classList.toggle("dark", resolved === "dark");
+  }, [resolved]);
 
   const setTheme = useCallback((value: Theme) => {
-    setThemeState(value);
     localStorage.setItem("lixazon-theme", value);
+    window.dispatchEvent(new Event(THEME_EVENT));
   }, []);
 
-  return (
-    <ThemeContext.Provider value={{ theme, resolved, setTheme }}>{children}</ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme, resolved, setTheme }}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

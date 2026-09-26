@@ -29,13 +29,12 @@ export function NotificationMenu({
         </>
       }
     >
-      {(close) => (
-        <div>
+      <div>
           <p className="border-b border-[var(--border)] px-4 py-3 font-heading text-sm font-bold">Notifications</p>
           {!signedIn ? (
             <div className="px-4 py-4 text-sm text-[var(--text-muted)]">
               <p>Sign in to see updates about your orders.</p>
-              <Link href="/login?next=/" onClick={close} className="mt-3 inline-flex font-semibold text-[var(--sky)]">
+              <Link href="/login?next=/" className="mt-3 inline-flex font-semibold text-[var(--sky)]">
                 Sign in
               </Link>
             </div>
@@ -49,7 +48,6 @@ export function NotificationMenu({
                 <li key={item.id}>
                   <Link
                     href={item.href}
-                    onClick={close}
                     className={cn(
                       "lx-focus block px-4 py-3 hover:bg-[var(--bg-page)]",
                       item.active && "bg-[var(--sky-soft)]"
@@ -63,7 +61,6 @@ export function NotificationMenu({
             </ul>
           )}
         </div>
-      )}
     </Popover>
   );
 }

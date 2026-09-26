@@ -30,7 +30,7 @@ export function SellerCharts({
           <BarChart data={data}>
             <XAxis dataKey="day" tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} width={40} />
-            <Tooltip formatter={(v: number) => [`$${v.toFixed(2)}`, "Revenue"]} />
+            <Tooltip formatter={(value) => [`$${Number(value ?? 0).toFixed(2)}`, "Revenue"]} />
             <Bar dataKey="revenue" fill="#ff9900" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>

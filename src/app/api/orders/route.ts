@@ -1,4 +1,4 @@
-import { handleApiError, jsonOk, jsonError } from "@/lib/api";
+import { handleApiError, jsonOk } from "@/lib/api";
 import { requireApiSession } from "@/lib/session";
 import { prisma } from "@/lib/db";
 
