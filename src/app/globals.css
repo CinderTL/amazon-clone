@@ -152,6 +152,16 @@ textarea:disabled,
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 8%, transparent);
 }
 
+.lx-header .lx-focus:focus-visible {
+  outline-color: #ffffff;
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 35%);
+}
+
+.lx-header .lx-search .lx-focus:focus-visible {
+  outline-color: #111111;
+  box-shadow: 0 0 0 3px rgb(17 17 17 / 16%);
+}
+
 .lx-backdrop {
   animation: lx-fade 160ms ease;
 }

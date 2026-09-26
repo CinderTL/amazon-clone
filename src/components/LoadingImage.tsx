@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { ImageOff } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, isPlaceholderImageUrl } from "@/lib/utils";
 
 type LoadingImageProps = {
   src?: string | null;
@@ -77,7 +77,7 @@ function LoadingImageInner({
 
 export function LoadingImage(props: LoadingImageProps) {
   const trimmed = props.src?.trim();
-  if (!trimmed) {
+  if (!trimmed || isPlaceholderImageUrl(trimmed)) {
     return (
       <div className={cn("relative overflow-hidden bg-[var(--canvas)]", props.className)}>
         <ImageFallback alt={props.alt}>{props.fallback}</ImageFallback>

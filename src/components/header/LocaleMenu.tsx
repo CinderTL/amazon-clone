@@ -23,7 +23,7 @@ export function LocaleMenu({ compact = false, align = "start" }: { compact?: boo
       <button
         type="button"
         className={cn(
-          "lx-focus inline-flex items-center gap-1 rounded px-2 py-2 text-sm font-semibold hover:bg-[var(--canvas)]",
+          "lx-focus inline-flex items-center gap-1 rounded px-2 py-2 text-sm font-semibold text-white hover:bg-white/15",
           compact && "px-1.5"
         )}
         aria-expanded={open}
@@ -42,7 +42,7 @@ export function LocaleMenu({ compact = false, align = "start" }: { compact?: boo
           role="dialog"
           aria-label="Country and currency"
           className={cn(
-            "lx-pop absolute top-full z-[60] mt-2 w-72 rounded border border-[var(--border)] bg-[var(--surface)] p-3 shadow-none",
+            "lx-pop absolute top-full z-[60] mt-2 w-72 rounded border border-[var(--border)] bg-[var(--surface)] p-3 text-[var(--foreground)] shadow-none",
             align === "end" ? "right-0" : "left-0"
           )}
         >

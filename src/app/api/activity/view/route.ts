@@ -12,6 +12,11 @@ export async function POST(request: Request) {
   try {
     const session = await getApiSession();
     if (!session) return jsonOk({ ok: true });
+    const user = await prisma.user.findUnique({
+      where: { id: session.userId },
+      select: { id: true },
+    });
+    if (!user) return jsonOk({ ok: true });
     const raw = await request.text();
     const body = schema.parse(raw ? JSON.parse(raw) : {});
     const product = await prisma.product.findFirst({
@@ -24,7 +29,7 @@ export async function POST(request: Request) {
     const subcategoryId = product.category.parentId ? product.category.id : null;
     const since = new Date(Date.now() - 30 * 60 * 1000);
     const recent = await prisma.productView.findFirst({
-      where: { userId: session.userId, productId: product.id, createdAt: { gte: since } },
+      where: { userId: user.id, productId: product.id, createdAt: { gte: since } },
       orderBy: { createdAt: "desc" },
     });
 
@@ -36,7 +41,7 @@ export async function POST(request: Request) {
     } else {
       await prisma.productView.create({
         data: {
-          userId: session.userId,
+          userId: user.id,
           productId: product.id,
           categoryId,
           subcategoryId,

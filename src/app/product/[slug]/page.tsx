@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getProductBySlug } from "@/services/catalog";
-import { parseImages } from "@/lib/utils";
+import { isPlaceholderImageUrl, parseImages } from "@/lib/utils";
 import { StarRating } from "@/components/ui/StarRating";
 import { ProductImage } from "@/components/ProductImage";
 import { ProductGrid } from "@/components/ProductCard";
@@ -10,7 +10,7 @@ import { Price } from "@/components/CurrencyProvider";
 import { ProductReviews } from "@/components/reviews/ProductReviews";
 import { ProductViewTracker } from "@/components/ProductViewTracker";
 import { prisma } from "@/lib/db";
-import { getSession } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { hasPurchasedProduct, ratingDistribution } from "@/services/reviews";
 
 export const dynamic = "force-dynamic";
@@ -20,8 +20,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const product = await getProductBySlug(slug);
   if (!product || !product.active || product.status !== "PUBLISHED") notFound();
 
-  const images = parseImages(product.images);
-  const gallery = images.length ? images : product.imageUrl ? [product.imageUrl] : [];
+  const images = parseImages(product.images).filter((src) => !isPlaceholderImageUrl(src));
+  const cover = product.imageUrl && !isPlaceholderImageUrl(product.imageUrl) ? product.imageUrl : null;
+  const gallery = images.length ? images : cover ? [cover] : [];
   const related = product.categoryId
     ? await prisma.product.findMany({
         where: { active: true, status: "PUBLISHED", categoryId: product.categoryId, id: { not: product.id } },
@@ -30,8 +31,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       })
     : [];
 
-  const session = await getSession();
-  const canReview = session ? await hasPurchasedProduct(session.userId, product.id) : false;
+  const user = await getCurrentUser();
+  const canReview = user ? await hasPurchasedProduct(user.id, product.id) : false;
   const distribution = await ratingDistribution(product.id);
 
   const shipping =
@@ -41,7 +42,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
-      {session && <ProductViewTracker productId={product.id} />}
+      {user && <ProductViewTracker productId={product.id} />}
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="lx-card p-4">
           <div className="relative aspect-square overflow-hidden rounded-2xl bg-[var(--elevated)]">
@@ -115,8 +116,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         count={distribution.total}
         distribution={distribution.counts}
         canReview={canReview}
-        signedIn={Boolean(session)}
-        currentUserId={session?.userId ?? null}
+        signedIn={Boolean(user)}
+        currentUserId={user?.id ?? null}
         reviews={product.reviews.map((review) => ({
           id: review.id,
           userId: review.userId,

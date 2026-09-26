@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import { ApiError, handleApiError, jsonOk } from "@/lib/api";
 import { requireApiSeller } from "@/lib/session";
-import { uploadsDirectory } from "@/lib/uploads";
+import { uploadsDirectory, type UploadScope } from "@/lib/uploads";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 

@@ -39,7 +39,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
     <Popover
       label="Account menu"
       panelRole="menu"
-      triggerClassName="inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[var(--signal)] text-sm font-bold text-[var(--canvas)]"
+      triggerClassName="inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white text-sm font-bold text-[#FF5A00]"
       trigger={
         showPhoto ? (
           <LoadingImage

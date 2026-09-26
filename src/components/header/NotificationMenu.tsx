@@ -18,13 +18,13 @@ export function NotificationMenu({
   return (
     <Popover
       label="Notifications"
-      triggerClassName="relative inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-[var(--canvas)]"
+      triggerClassName="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-white hover:bg-white/15"
       panelClassName="w-[min(20rem,calc(100vw-1.5rem))] p-0"
       trigger={
         <>
           <Bell className="h-5 w-5" aria-hidden />
           {signedIn && activeCount > 0 && (
-            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[var(--signal)]" aria-hidden />
+            <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-[#C62828] ring-2 ring-white" aria-hidden />
           )}
         </>
       }
