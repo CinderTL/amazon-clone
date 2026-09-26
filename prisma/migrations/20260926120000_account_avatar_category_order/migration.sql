@@ -1,0 +1,3 @@
+ALTER TABLE "User" ADD COLUMN "avatarUrl" TEXT;
+ALTER TABLE "User" ADD COLUMN "authProvider" TEXT NOT NULL DEFAULT 'credentials';
+ALTER TABLE "Category" ADD COLUMN "sortOrder" INTEGER NOT NULL DEFAULT 0;

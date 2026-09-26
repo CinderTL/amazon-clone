@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus } from "@/generated/prisma/client";
 import { handleApiError, jsonOk, readJson } from "@/lib/api";
 import { requireApiSeller } from "@/lib/session";
 import { getSellerForUser, listSellerOrders, updateSellerOrderStatus } from "@/services/seller";

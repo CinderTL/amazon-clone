@@ -1,28 +1,42 @@
 import Link from "next/link";
-import { POPULAR_CATEGORIES } from "@/lib/nav-categories";
+import { ProductImage } from "@/components/ProductImage";
 
-export function PopularCategoryStrips() {
+const ACCENT: Record<string, string> = {
+  coral: "var(--coral)",
+  sky: "var(--sky)",
+  mint: "var(--mint)",
+  mustard: "var(--mustard)",
+};
+
+export function PopularCategoryStrips({
+  categories,
+}: {
+  categories: { name: string; slug: string; imageUrl: string | null; accent: string }[];
+}) {
   return (
-    <section className="w-full grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
-      {POPULAR_CATEGORIES.map((cat) => (
+    <section className="grid w-full grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+      {categories.map((cat) => (
         <Link
           key={cat.slug}
           href={`/category/${cat.slug}`}
-          className="group relative min-h-[220px] md:min-h-[280px] xl:min-h-[320px] overflow-hidden flex flex-col justify-end p-5 md:p-6"
-          style={{ backgroundColor: cat.color }}
+          className="lx-focus group relative flex min-h-[220px] flex-col justify-end overflow-hidden p-5 md:min-h-[280px] md:p-6 xl:min-h-[320px]"
+          style={{ backgroundColor: ACCENT[cat.accent] ?? "var(--sky)" }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={cat.image}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover opacity-25 group-hover:opacity-35 group-hover:scale-105 transition-all duration-300"
-          />
+          {cat.imageUrl && (
+            <ProductImage
+              src={cat.imageUrl}
+              alt=""
+              className="absolute inset-0"
+              imageClassName="opacity-25 transition-opacity duration-300 group-hover:opacity-35"
+              sizes="(max-width: 768px) 50vw, 16vw"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
           <div className="relative z-10">
-            <h2 className="font-heading text-2xl md:text-3xl font-extrabold text-white leading-tight drop-shadow-sm">
+            <h2 className="font-heading text-2xl font-extrabold leading-tight text-white drop-shadow-sm md:text-3xl">
               {cat.name}
             </h2>
-            <span className="mt-3 inline-flex opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 lx-pill bg-white text-[var(--text)] text-sm font-semibold px-4 py-2">
+            <span className="mt-3 inline-flex translate-y-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-[var(--text)] opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
               Browse {cat.name}
             </span>
           </div>

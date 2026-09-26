@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -39,8 +40,9 @@ export function SellerShell({
               </Link>
             ))}
           </nav>
-          <Link href="/" className="block mt-4 px-2 text-xs text-[var(--sky)]">
-            ← Back to shop
+          <Link href="/" className="lx-focus mt-4 inline-flex items-center gap-1 px-2 text-xs text-[var(--sky)]">
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
+            Back to shop
           </Link>
         </aside>
         <div className="flex-1 min-w-0">{children}</div>

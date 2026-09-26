@@ -16,7 +16,7 @@ async function verifyRole(token: string): Promise<string | null> {
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get(COOKIE_NAME)?.value;
   const role = token ? await verifyRole(token) : null;
@@ -35,11 +35,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (
-    pathname.startsWith("/account") ||
-    pathname.startsWith("/checkout") ||
-    pathname === "/cart"
-  ) {
+  if (pathname.startsWith("/account") || pathname.startsWith("/checkout") || pathname === "/cart") {
     if (!role) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Input, Label, Textarea, Select } from "@/components/ui/Form";
 import { formatPrice } from "@/lib/utils";
 import { ProductImage } from "@/components/ProductImage";
+import { ConfirmDialog } from "@/components/ui/Dialog";
 
 export function ProductForm({
   categories,
@@ -145,10 +146,15 @@ export function ProductTable({
   }[];
 }) {
   const router = useRouter();
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  async function remove(id: string) {
-    if (!confirm("Delete this product?")) return;
-    await fetch(`/api/seller/products/${id}`, { method: "DELETE" });
+  async function remove() {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    await fetch(`/api/seller/products/${pendingDelete}`, { method: "DELETE" });
+    setDeleting(false);
+    setPendingDelete(null);
     router.refresh();
   }
 
@@ -189,7 +195,7 @@ export function ProductTable({
                   <Link href={`/seller/products/${p.id}/edit`} className="text-[var(--sky)]">
                     Edit
                   </Link>
-                  <button type="button" className="text-[var(--coral)]" onClick={() => remove(p.id)}>
+                  <button type="button" className="lx-focus text-[var(--coral)]" onClick={() => setPendingDelete(p.id)}>
                     Delete
                   </button>
                 </td>
@@ -205,6 +211,16 @@ export function ProductTable({
           </tbody>
         </table>
       </div>
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={remove}
+        title="Delete this product?"
+        description="This removes the product from your store. You can’t undo this action."
+        confirmLabel="Delete"
+        destructive
+        loading={deleting}
+      />
     </div>
   );
 }

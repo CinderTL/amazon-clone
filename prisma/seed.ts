@@ -1,7 +1,12 @@
-import { PrismaClient, Role, OrderStatus, PaymentStatus } from "@prisma/client";
+import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient, Role, OrderStatus, PaymentStatus } from "../src/generated/prisma/client";
 import bcrypt from "bcryptjs";
+import { CATEGORY_CATALOG, LEGACY_CATEGORY_SLUGS, categoryImage } from "../src/lib/category-catalog";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL ?? "" }),
+});
 
 const UNSPLASH = [
   "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80",
@@ -75,6 +80,19 @@ async function main() {
     },
   });
 
+  await prisma.user.create({
+    data: {
+      email: "ava@example.com",
+      passwordHash,
+      name: "Ava Rivera",
+      role: Role.CUSTOMER,
+      authProvider: "google",
+      avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+      cart: { create: {} },
+      wishlist: { create: {} },
+    },
+  });
+
   const sellerUser = await prisma.user.create({
     data: {
       email: "seller@example.com",
@@ -142,28 +160,30 @@ async function main() {
     },
   });
 
-  const topCats = [
-    { name: "Food", slug: "food", accent: "coral", description: "Groceries, snacks, and pantry staples" },
-    { name: "Apparel", slug: "apparel", accent: "coral", description: "Everyday style staples" },
-    { name: "Tech", slug: "tech", accent: "mint", description: "Laptops, peripherals, and desks" },
-    { name: "Accessories", slug: "accessories", accent: "mint", description: "Bags, wallets, and little lifts" },
-    { name: "Electronics", slug: "electronics", accent: "sky", description: "Audio, wearables, and smart gear" },
-    { name: "Home & Kitchen", slug: "home-kitchen", accent: "mustard", description: "Cookware and comfort" },
-    { name: "Sports", slug: "sports", accent: "sky", description: "Move more, gear less" },
-  ] as const;
-
   const categories: Record<string, string> = {};
-  for (const [i, c] of topCats.entries()) {
+  for (const [i, parent] of CATEGORY_CATALOG.entries()) {
     const cat = await prisma.category.create({
       data: {
-        name: c.name,
-        slug: c.slug,
-        description: c.description,
-        accent: c.accent,
-        imageUrl: img(100 + i),
+        name: parent.name,
+        slug: parent.slug,
+        description: parent.description,
+        accent: parent.accent,
+        imageUrl: categoryImage(parent.slug),
+        sortOrder: i,
+        children: {
+          create: parent.children.map((child, index) => ({
+            name: child.name,
+            slug: child.slug,
+            accent: parent.accent,
+            imageUrl: categoryImage(child.slug),
+            sortOrder: index,
+          })),
+        },
       },
+      include: { children: true },
     });
-    categories[c.slug] = cat.id;
+    categories[cat.slug] = cat.id;
+    for (const child of cat.children) categories[child.slug] = child.id;
   }
 
   type SeedProduct = {
@@ -643,7 +663,7 @@ async function main() {
         images,
         brand: p.brand,
         featured: Boolean(p.featured),
-        categoryId: categories[p.category],
+        categoryId: categories[LEGACY_CATEGORY_SLUGS[p.category] ?? p.category],
         sellerId: p.sellerId,
         rating: 4 + (p.seed % 10) / 10,
         reviewCount: 0,
@@ -836,7 +856,7 @@ async function main() {
   });
 
   console.log(`Seeded ${createdProducts.length} products, order ${order.orderNumber}`);
-  console.log("Demo: customer@example.com / seller@example.com — password123");
+  console.log("Demo: customer@example.com / seller@example.com / ava@example.com — password123");
 }
 
 main()

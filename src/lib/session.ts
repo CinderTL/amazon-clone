@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
-import { Role } from "@prisma/client";
+import { Role } from "@/generated/prisma/client";
 import { COOKIE_NAME, type SessionPayload } from "./auth";
 
 function getSecret() {

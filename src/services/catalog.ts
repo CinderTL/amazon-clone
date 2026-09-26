@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db";
 
 export type ProductListParams = {
@@ -125,7 +125,24 @@ export async function getProductBySlug(slug: string) {
 export async function listCategories() {
   return prisma.category.findMany({
     where: { parentId: null },
-    include: { children: true },
-    orderBy: { name: "asc" },
+    include: { children: { orderBy: { sortOrder: "asc" } } },
+    orderBy: { sortOrder: "asc" },
   });
+}
+
+export async function listCategoryOptions() {
+  const categories = await prisma.category.findMany({
+    where: { children: { none: {} } },
+    include: { parent: { select: { name: true, sortOrder: true } } },
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+  });
+
+  return categories
+    .map((category) => ({
+      id: category.id,
+      name: category.parent ? `${category.parent.name} / ${category.name}` : category.name,
+      sort: (category.parent?.sortOrder ?? category.sortOrder) * 100 + category.sortOrder,
+    }))
+    .sort((a, b) => a.sort - b.sort || a.name.localeCompare(b.name))
+    .map(({ id, name }) => ({ id, name }));
 }

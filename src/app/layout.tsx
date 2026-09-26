@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import { Header, Footer } from "@/components/Header";
+import { SiteChrome } from "@/components/SiteChrome";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
@@ -29,13 +30,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning className={`${heading.variable} ${body.variable}`}>
       <body id="top" className="flex flex-col antialiased" suppressHydrationWarning>
         <ThemeProvider>
-          <div className="min-h-[100vh] min-h-svh flex flex-col">
-            <div className="shrink-0">
-              <Header />
-            </div>
-            <main className="flex-1 w-full flex flex-col min-h-0">{children}</main>
-          </div>
-          <Footer />
+          <SiteChrome header={<Header />} footer={<Footer />}>
+            {children}
+          </SiteChrome>
         </ThemeProvider>
       </body>
     </html>

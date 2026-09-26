@@ -2,7 +2,7 @@ import { z } from "zod";
 import { handleApiError, jsonError, jsonOk, readJson } from "@/lib/api";
 import { requireApiSession } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { PaymentStatus, OrderStatus } from "@prisma/client";
+import { PaymentStatus, OrderStatus } from "@/generated/prisma/client";
 
 const schema = z.object({
   productId: z.string().min(1),

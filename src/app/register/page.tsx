@@ -1,12 +1,17 @@
+import { Suspense } from "react";
 import { RegisterForm } from "@/components/AuthForms";
 
 export default function RegisterPage() {
   return (
-    <div className="max-w-md mx-auto px-4 py-12">
-      <div className="lx-card p-6 md:p-8">
+    <div className="flex w-full flex-1 items-start justify-center px-4 py-6 md:items-center md:overflow-y-auto md:py-4">
+      <div className="lx-card w-full max-w-md p-6 md:p-8">
         <h1 className="font-heading text-2xl font-extrabold">Create your Lixazon account</h1>
-        <p className="text-sm text-[var(--text-muted)] mt-1 mb-6">Buy or sell—pick a role to get started.</p>
-        <RegisterForm />
+        <p className="mb-6 mt-1 text-sm text-[var(--text-muted)]">
+          New accounts start as customers. You can become a seller later from the header.
+        </p>
+        <Suspense fallback={<p className="text-sm text-[var(--text-muted)]">Loading…</p>}>
+          <RegisterForm />
+        </Suspense>
       </div>
     </div>
   );

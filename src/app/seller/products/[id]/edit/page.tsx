@@ -3,6 +3,7 @@ import { requireSeller } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { SellerShell } from "@/components/SellerNav";
 import { ProductForm } from "@/components/SellerForms";
+import { listCategoryOptions } from "@/services/catalog";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -13,7 +14,7 @@ export default async function EditProductPage({ params }: Props) {
   const { id } = await params;
   const [product, categories] = await Promise.all([
     prisma.product.findFirst({ where: { id, sellerId: seller.id } }),
-    prisma.category.findMany({ orderBy: { name: "asc" } }),
+    listCategoryOptions(),
   ]);
   if (!product) notFound();
 

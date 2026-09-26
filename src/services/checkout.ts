@@ -1,4 +1,4 @@
-import { OrderStatus, PaymentStatus, Prisma } from "@prisma/client";
+import { OrderStatus, PaymentStatus, Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db";
 import { cartTotals, getOrCreateCart } from "./cart";
 import { getStripe, stripeStubEnabled } from "@/lib/stripe";

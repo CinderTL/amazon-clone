@@ -50,8 +50,14 @@ export function LoginForm() {
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Signing in…" : "Sign in"}
       </Button>
-      <p className="text-sm text-[var(--text-muted)] text-center">
-        New here? <Link href="/register" className="text-[var(--sky)] font-medium">Create an account</Link>
+      <p className="text-center text-sm text-[var(--text-muted)]">
+        New here?{" "}
+        <Link
+          href={next && next !== "/" ? `/register?next=${encodeURIComponent(next)}` : "/register"}
+          className="font-medium text-[var(--sky)]"
+        >
+          Create an account
+        </Link>
       </p>
     </form>
   );
@@ -59,9 +65,10 @@ export function LoginForm() {
 
 export function RegisterForm() {
   const router = useRouter();
+  const params = useSearchParams();
+  const next = params.get("next") || "/";
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState<"CUSTOMER" | "SELLER">("CUSTOMER");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -75,8 +82,6 @@ export function RegisterForm() {
         name: form.get("name"),
         email: form.get("email"),
         password: form.get("password"),
-        role,
-        storeName: form.get("storeName") || undefined,
       }),
     });
     const data = await res.json();
@@ -85,7 +90,7 @@ export function RegisterForm() {
       setError(data.error || "Registration failed");
       return;
     }
-    router.push(role === "SELLER" ? "/seller/dashboard" : "/");
+    router.push(next);
     router.refresh();
   }
 
@@ -104,23 +109,15 @@ export function RegisterForm() {
         <Label htmlFor="password">Password</Label>
         <Input id="password" name="password" type="password" minLength={8} required />
       </div>
-      <div className="flex gap-2">
-        <Button type="button" variant={role === "CUSTOMER" ? "sky" : "secondary"} onClick={() => setRole("CUSTOMER")}>
-          Buyer
-        </Button>
-        <Button type="button" variant={role === "SELLER" ? "mint" : "secondary"} onClick={() => setRole("SELLER")}>
-          Seller
-        </Button>
-      </div>
-      {role === "SELLER" && (
-        <div>
-          <Label htmlFor="storeName">Store name</Label>
-          <Input id="storeName" name="storeName" required />
-        </div>
-      )}
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Creating…" : "Create account"}
       </Button>
+      <p className="text-center text-sm text-[var(--text-muted)]">
+        Already have an account?{" "}
+        <Link href={next && next !== "/" ? `/login?next=${encodeURIComponent(next)}` : "/login"} className="font-medium text-[var(--sky)]">
+          Sign in
+        </Link>
+      </p>
     </form>
   );
 }

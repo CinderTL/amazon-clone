@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { slugify } from "@/lib/utils";
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus } from "@/generated/prisma/client";
 
 export async function getSellerForUser(userId: string) {
   const seller = await prisma.sellerProfile.findUnique({ where: { userId } });

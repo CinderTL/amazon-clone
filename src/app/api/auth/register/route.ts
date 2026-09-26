@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client";
+import { Role } from "@/generated/prisma/client";
 import { z } from "zod";
 import { handleApiError, jsonError, jsonOk, readJson } from "@/lib/api";
 import { createSession, hashPassword } from "@/lib/auth";
@@ -8,8 +8,6 @@ const schema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   name: z.string().min(2),
-  role: z.enum(["CUSTOMER", "SELLER"]).default("CUSTOMER"),
-  storeName: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -19,28 +17,16 @@ export async function POST(request: Request) {
     if (existing) return jsonError("Email already registered", 409);
 
     const passwordHash = await hashPassword(body.password);
-    const role = body.role === "SELLER" ? Role.SELLER : Role.CUSTOMER;
-
     const user = await prisma.user.create({
       data: {
         email: body.email.toLowerCase(),
         passwordHash,
         name: body.name,
-        role,
+        role: Role.CUSTOMER,
+        authProvider: "credentials",
         cart: { create: {} },
         wishlist: { create: {} },
-        sellerProfile:
-          role === Role.SELLER
-            ? {
-                create: {
-                  storeName: body.storeName || `${body.name}'s Store`,
-                  slug: `${body.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now().toString(36)}`,
-                  description: "New Lixazon seller",
-                },
-              }
-            : undefined,
       },
-      include: { sellerProfile: true },
     });
 
     await createSession({
@@ -57,7 +43,6 @@ export async function POST(request: Request) {
           email: user.email,
           name: user.name,
           role: user.role,
-          sellerProfile: user.sellerProfile,
         },
       },
       201

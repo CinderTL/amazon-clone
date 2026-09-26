@@ -2,24 +2,23 @@ import { prisma } from "@/lib/db";
 import { DealCarousel, type DealSlide } from "@/components/DealCarousel";
 import { PopularCategoryStrips } from "@/components/PopularCategoryStrips";
 import { ProductBrowse } from "@/components/ProductBrowse";
-import { NAV_CATEGORIES } from "@/lib/nav-categories";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const categorySlugs = NAV_CATEGORIES.map((c) => c.slug);
-
   const categories = await prisma.category.findMany({
-    where: { slug: { in: categorySlugs } },
-    select: { id: true, name: true, slug: true },
+    where: { parentId: null },
+    orderBy: { sortOrder: "asc" },
+    include: { children: { select: { id: true } } },
   });
 
   const deals: DealSlide[] = [];
   for (const cat of categories) {
+    const ids = [cat.id, ...cat.children.map((child) => child.id)];
     const best = await prisma.product.findFirst({
       where: {
         active: true,
-        categoryId: cat.id,
+        categoryId: { in: ids },
         compareAt: { not: null },
       },
       orderBy: [{ featured: "desc" }, { rating: "desc" }],
@@ -27,7 +26,7 @@ export default async function HomePage() {
     const fallback =
       best ||
       (await prisma.product.findFirst({
-        where: { active: true, categoryId: cat.id },
+        where: { active: true, categoryId: { in: ids } },
         orderBy: { rating: "desc" },
       }));
     if (fallback) {
@@ -65,7 +64,14 @@ export default async function HomePage() {
 
   return (
     <div className="w-full">
-      <PopularCategoryStrips />
+      <PopularCategoryStrips
+        categories={categories.slice(0, 6).map((category) => ({
+          name: category.name,
+          slug: category.slug,
+          imageUrl: category.imageUrl,
+          accent: category.accent,
+        }))}
+      />
       <DealCarousel deals={deals} />
       <ProductBrowse initialProducts={initialProducts} initialTotal={total} pageSize={pageSize} />
     </div>

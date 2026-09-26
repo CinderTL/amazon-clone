@@ -148,16 +148,66 @@ button {
 }
 
 .shimmer {
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text-muted) 12%, transparent), transparent);
-  background-size: 200% 100%;
-  animation: shimmer 1.2s infinite;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--border) 70%, var(--bg-page)) 0%,
+    color-mix(in srgb, var(--surface) 88%, white) 45%,
+    color-mix(in srgb, var(--border) 70%, var(--bg-page)) 100%
+  );
+  background-size: 220% 100%;
+  animation: shimmer 2.8s ease-in-out infinite;
 }
 
 @keyframes shimmer {
   0% {
-    background-position: 200% 0;
+    background-position: 120% 0;
   }
   100% {
-    background-position: -200% 0;
+    background-position: -120% 0;
+  }
+}
+
+.lx-focus:focus-visible {
+  outline: 2px solid var(--sky);
+  outline-offset: 2px;
+}
+
+.lx-backdrop {
+  animation: lx-fade 160ms ease;
+}
+
+.lx-dialog,
+.lx-pop,
+.lx-overlay {
+  animation: lx-rise 180ms ease;
+}
+
+@keyframes lx-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lx-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer,
+  .lx-backdrop,
+  .lx-dialog,
+  .lx-pop,
+  .lx-overlay {
+    animation: none;
   }
 }

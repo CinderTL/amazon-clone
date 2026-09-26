@@ -1,10 +1,10 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -36,6 +36,8 @@ model User {
   passwordHash  String
   name          String
   role          Role           @default(CUSTOMER)
+  avatarUrl     String?
+  authProvider  String         @default("credentials")
   phone         String?
   themePref     String?
   createdAt     DateTime       @default(now())
@@ -69,6 +71,7 @@ model Category {
   description String?
   imageUrl    String?
   accent      String     @default("coral")
+  sortOrder   Int        @default(0)
   parentId    String?
   parent      Category?  @relation("CategoryTree", fields: [parentId], references: [id])
   children    Category[] @relation("CategoryTree")

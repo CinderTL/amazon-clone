@@ -20,6 +20,15 @@ export function formatDate(date: Date | string) {
   }).format(new Date(date));
 }
 
+export function accountInitial(name: string, email?: string) {
+  const source = name.trim() || email?.trim() || "";
+  return source.charAt(0).toUpperCase() || "L";
+}
+
+export function hasThirdPartyAvatar(user: { authProvider: string; avatarUrl: string | null }) {
+  return user.authProvider !== "credentials" && Boolean(user.avatarUrl?.trim());
+}
+
 export function slugify(text: string) {
   return text
     .toLowerCase()

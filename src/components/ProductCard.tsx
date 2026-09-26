@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Product, Category, SellerProfile } from "@prisma/client";
+import type { Product, Category, SellerProfile } from "@/generated/prisma/client";
 import { formatPrice } from "@/lib/utils";
 import { StarRating } from "@/components/ui/StarRating";
 import { ProductImage } from "@/components/ProductImage";
