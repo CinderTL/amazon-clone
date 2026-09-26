@@ -145,41 +145,41 @@ export function HeaderBar({
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--canvas)]/95 backdrop-blur-md">
       <div className="hidden h-16 items-center gap-4 px-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:px-8">
-        <div className="flex items-center gap-1 justify-self-start">
-          <CategoriesButton expanded={categoriesOpen} onOpen={openCategories} />
-          <LocaleMenu />
+        <div className="flex items-center justify-self-start">
+          <Logo />
         </div>
         <div className="flex items-center gap-3">
-          <Logo />
+          <CategoriesButton expanded={categoriesOpen} onOpen={openCategories} />
           <SearchForm className="w-[min(34rem,34vw)]" />
-          <CartLink count={cartCount} />
+          <LocaleMenu align="end" />
         </div>
         <div className="flex items-center justify-self-end gap-1">
           {showBecomeSeller && <BecomeSellerLink href={becomeHref} />}
           <NotificationMenu notifications={notifications} signedIn={Boolean(user)} />
+          <CartLink count={cartCount} />
           <AccountSlot user={user} />
         </div>
       </div>
 
       <div className="space-y-2 px-3 py-2 lg:hidden">
         <div className="relative flex h-12 items-center">
-          <div className="relative z-10 flex min-w-0 max-w-[58%] items-center gap-1">
-            <CategoriesButton expanded={categoriesOpen} onOpen={openCategories} className="min-w-0" />
-            <LocaleMenu compact />
+          <div className="relative z-10 flex min-w-0 items-center">
+            <Logo />
           </div>
           <div className="pointer-events-none absolute left-1/2 -translate-x-1/2">
             <span className="pointer-events-auto">
-              <Logo />
+              <CategoriesButton expanded={categoriesOpen} onOpen={openCategories} className="min-w-0 max-w-[34vw]" />
             </span>
           </div>
           <div className="relative z-10 ml-auto flex items-center gap-1">
             <NotificationMenu notifications={notifications} signedIn={Boolean(user)} />
+            <CartLink count={cartCount} />
             <AccountSlot user={user} />
           </div>
         </div>
         <div className="flex items-center gap-2">
           <SearchForm className="min-w-0 flex-1" />
-          <CartLink count={cartCount} />
+          <LocaleMenu compact align="end" />
         </div>
         {showBecomeSeller && <BecomeSellerLink href={becomeHref} className="w-full" />}
       </div>

@@ -6,7 +6,7 @@ import { useCurrency } from "@/components/CurrencyProvider";
 import { CURRENCIES, MARKETS, marketByCountry } from "@/lib/markets";
 import { cn } from "@/lib/utils";
 
-export function LocaleMenu({ compact = false }: { compact?: boolean }) {
+export function LocaleMenu({ compact = false, align = "start" }: { compact?: boolean; align?: "start" | "end" }) {
   const { countryCode, currency, setMarket } = useCurrency();
   const [open, setOpen] = useState(false);
   const [country, setCountry] = useState(countryCode);
@@ -41,7 +41,10 @@ export function LocaleMenu({ compact = false }: { compact?: boolean }) {
         <div
           role="dialog"
           aria-label="Country and currency"
-          className="lx-pop absolute left-0 top-full z-[60] mt-2 w-72 rounded border border-[var(--border)] bg-[var(--surface)] p-3 shadow-none"
+          className={cn(
+            "lx-pop absolute top-full z-[60] mt-2 w-72 rounded border border-[var(--border)] bg-[var(--surface)] p-3 shadow-none",
+            align === "end" ? "right-0" : "left-0"
+          )}
         >
           <label className="block text-xs font-semibold text-[var(--muted)]" htmlFor="market-country">
             Country
