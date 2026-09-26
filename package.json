@@ -11,6 +11,7 @@
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "db:essentials": "tsx prisma/seed.ts",
     "db:clean": "tsx prisma/clean.ts",
     "db:setup": "docker compose up -d && prisma migrate deploy && tsx prisma/seed.ts",
     "postinstall": "prisma generate"

@@ -47,13 +47,6 @@ With placeholder Stripe keys, checkout still creates real orders in Postgres via
 stripe listen --forward-to localhost:3000/api/webhooks/stripe
 ```
 
-## Demo accounts
-
-| Role | Email | Password |
-|------|-------|----------|
-| Customer | `customer@example.com` | `password123` |
-| Seller | `seller@example.com` | `password123` |
-
 ## Scripts
 
 | Script | Description |
@@ -61,8 +54,10 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 | `npm run dev` | Next.js dev server |
 | `npm run build` / `start` | Production |
 | `npm run db:migrate` | Apply Prisma migrations |
-| `npm run db:seed` | Seed catalog |
-| `npm run db:setup` | Docker up + migrate + seed |
+| `npm run db:essentials` | Create or update marketplace categories. Leaves accounts and seller data in place. |
+| `npm run db:seed` | Same as `db:essentials` |
+| `npm run db:clean -- --yes` | Remove hardcoded mock accounts, stores, products, and unused legacy categories |
+| `npm run db:setup` | Docker up + migrate + essentials |
 
 ## Stack
 
