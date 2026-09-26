@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { formatPrice } from "@/lib/utils";
+import { useCurrency } from "@/components/CurrencyProvider";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Select } from "@/components/ui/Form";
 
@@ -26,6 +26,7 @@ export function CheckoutForm({
   totals: Totals;
 }) {
   const router = useRouter();
+  const { format } = useCurrency();
   const [step, setStep] = useState(1);
   const [addressId, setAddressId] = useState(addresses[0]?.id || "");
   const [error, setError] = useState("");
@@ -167,7 +168,7 @@ export function CheckoutForm({
                 Back
               </Button>
               <Button variant="primary" disabled={loading} onClick={confirmPay}>
-                {loading ? "Placing order…" : `Pay ${formatPrice(totals.total)}`}
+                {loading ? "Placing order…" : `Pay ${format(totals.total)}`}
               </Button>
             </div>
           </div>
@@ -179,19 +180,19 @@ export function CheckoutForm({
         <dl className="mt-3 space-y-2 text-sm">
           <div className="flex justify-between">
             <dt>Subtotal</dt>
-            <dd>{formatPrice(totals.subtotal)}</dd>
+            <dd>{format(totals.subtotal)}</dd>
           </div>
           <div className="flex justify-between">
             <dt>Shipping</dt>
-            <dd>{totals.shipping === 0 ? "Free" : formatPrice(totals.shipping)}</dd>
+            <dd>{totals.shipping === 0 ? "Free" : format(totals.shipping)}</dd>
           </div>
           <div className="flex justify-between">
             <dt>Tax</dt>
-            <dd>{formatPrice(totals.tax)}</dd>
+            <dd>{format(totals.tax)}</dd>
           </div>
           <div className="flex justify-between font-bold border-t border-[var(--border)] pt-2">
             <dt>Total</dt>
-            <dd>{formatPrice(totals.total)}</dd>
+            <dd>{format(totals.total)}</dd>
           </div>
         </dl>
       </aside>

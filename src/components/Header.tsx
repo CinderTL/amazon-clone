@@ -123,7 +123,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-[var(--border)] py-4 text-center text-xs text-[var(--muted)]">
-        © {new Date().getFullYear()} Lixazon. Demo marketplace.
+        © {new Date().getFullYear()} Lixazon
       </div>
     </footer>
   );

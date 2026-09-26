@@ -15,7 +15,7 @@ export async function getOrCreateWishlist(userId: string) {
 }
 
 export async function addWishlistItem(userId: string, productId: string) {
-  const product = await prisma.product.findFirst({ where: { id: productId, active: true } });
+  const product = await prisma.product.findFirst({ where: { id: productId, active: true, status: "PUBLISHED" } });
   if (!product) throw new Error("NOT_FOUND");
   const wishlist = await getOrCreateWishlist(userId);
   await prisma.wishlistItem.upsert({

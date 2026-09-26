@@ -6,12 +6,13 @@ export async function GET(_request: Request, context: { params: Promise<{ slug: 
   try {
     const { slug } = await context.params;
     const product = await getProductBySlug(slug);
-    if (!product || !product.active) return jsonError("Not found", 404);
+    if (!product || !product.active || product.status !== "PUBLISHED") return jsonError("Not found", 404);
 
     const related = await prisma.product.findMany({
       where: {
         active: true,
-        categoryId: product.categoryId,
+        status: "PUBLISHED",
+        categoryId: product.categoryId ?? undefined,
         id: { not: product.id },
       },
       take: 8,

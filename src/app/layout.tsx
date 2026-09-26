@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import { Header, Footer } from "@/components/Header";
 import { SiteChrome } from "@/components/SiteChrome";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { CurrencyProvider } from "@/components/CurrencyProvider";
+import { getMarket } from "@/lib/money";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,14 +21,17 @@ export const metadata: Metadata = {
   description: "A friendly, high-energy marketplace for buyers and sellers—simple without missing features.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const market = await getMarket();
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <body id="top" className="flex flex-col antialiased" suppressHydrationWarning>
         <ThemeProvider>
-          <SiteChrome header={<Header />} footer={<Footer />}>
-            {children}
-          </SiteChrome>
+          <CurrencyProvider countryCode={market.countryCode} currency={market.currency} rates={market.rates}>
+            <SiteChrome header={<Header />} footer={<Footer />}>
+              {children}
+            </SiteChrome>
+          </CurrencyProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, Search, ShoppingCart, Store } from "lucide-react";
 import { CategoriesOverlay } from "@/components/categories/CategoriesOverlay";
+import { LocaleMenu } from "@/components/header/LocaleMenu";
 import { NotificationMenu } from "@/components/header/NotificationMenu";
 import { UserMenu } from "@/components/header/UserMenu";
 import type { HeaderCategory, HeaderNotification, HeaderUser } from "@/components/header/types";
@@ -144,8 +145,9 @@ export function HeaderBar({
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--canvas)]/95 backdrop-blur-md">
       <div className="hidden h-16 items-center gap-4 px-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:px-8">
-        <div className="justify-self-start">
+        <div className="flex items-center gap-1 justify-self-start">
           <CategoriesButton expanded={categoriesOpen} onOpen={openCategories} />
+          <LocaleMenu />
         </div>
         <div className="flex items-center gap-3">
           <Logo />
@@ -161,11 +163,10 @@ export function HeaderBar({
 
       <div className="space-y-2 px-3 py-2 lg:hidden">
         <div className="relative flex h-12 items-center">
-          <CategoriesButton
-            expanded={categoriesOpen}
-            onOpen={openCategories}
-            className="relative z-10 max-w-[42%]"
-          />
+          <div className="relative z-10 flex min-w-0 max-w-[58%] items-center gap-1">
+            <CategoriesButton expanded={categoriesOpen} onOpen={openCategories} className="min-w-0" />
+            <LocaleMenu compact />
+          </div>
           <div className="pointer-events-none absolute left-1/2 -translate-x-1/2">
             <span className="pointer-events-auto">
               <Logo />

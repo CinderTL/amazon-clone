@@ -41,11 +41,11 @@ export function LoginForm() {
       {error && <p className="text-sm text-[var(--signal)]">{error}</p>}
       <div>
         <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" required defaultValue="customer@example.com" />
+        <Input id="email" name="email" type="email" required autoComplete="email" />
       </div>
       <div>
         <Label htmlFor="password">Password</Label>
-        <Input id="password" name="password" type="password" required defaultValue="password123" />
+        <Input id="password" name="password" type="password" required autoComplete="current-password" />
       </div>
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Signing in…" : "Sign in"}

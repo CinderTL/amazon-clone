@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { formatPrice, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
+import { Price } from "@/components/CurrencyProvider";
 import { Button } from "@/components/ui/Button";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +23,7 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ i
         <p className="text-sm font-semibold text-[var(--foreground)]">Order confirmed</p>
         <h1 className="font-heading text-3xl font-extrabold mt-2">{order.orderNumber}</h1>
         <p className="text-[var(--muted)] mt-2">
-          Placed {formatDate(order.createdAt)} · {formatPrice(order.total)}
+          Placed {formatDate(order.createdAt)} · <Price amount={order.total} />
         </p>
       </div>
       <div className="lx-card p-6 mt-4 space-y-3">
@@ -32,7 +33,9 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ i
               {item.name} × {item.quantity}
               {item.variantLabel ? ` (${item.variantLabel})` : ""}
             </span>
-            <span className="font-medium">{formatPrice(item.price * item.quantity)}</span>
+            <span className="font-medium">
+              <Price amount={item.price * item.quantity} />
+            </span>
           </div>
         ))}
       </div>

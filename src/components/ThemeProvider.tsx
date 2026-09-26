@@ -28,7 +28,7 @@ function subscribeTheme(onStoreChange: () => void) {
 
 function themeSnapshot(): Theme {
   const stored = localStorage.getItem("lixazon-theme");
-  return isTheme(stored) ? stored : "system";
+  return isTheme(stored) ? stored : "light";
 }
 
 function subscribeSystemDark(onStoreChange: () => void) {
@@ -38,7 +38,7 @@ function subscribeSystemDark(onStoreChange: () => void) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const theme = useSyncExternalStore(subscribeTheme, themeSnapshot, () => "system" as Theme);
+  const theme = useSyncExternalStore(subscribeTheme, themeSnapshot, () => "light" as Theme);
   const systemDark = useSyncExternalStore(subscribeSystemDark, () => window.matchMedia("(prefers-color-scheme: dark)").matches, () => false);
   const resolved = theme === "system" ? (systemDark ? "dark" : "light") : theme;
 

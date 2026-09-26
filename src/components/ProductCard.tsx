@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Product, Category, SellerProfile } from "@/generated/prisma/client";
-import { formatPrice } from "@/lib/utils";
+import { Price } from "@/components/CurrencyProvider";
 import { StarRating } from "@/components/ui/StarRating";
 import { ProductImage } from "@/components/ProductImage";
 import { Badge } from "@/components/ui/Badge";
@@ -36,9 +36,13 @@ export function ProductCard({ product }: { product: ProductWithRelations }) {
         <h3 className="text-sm font-medium text-[var(--foreground)] line-clamp-2 leading-snug">{product.name}</h3>
         <StarRating rating={product.rating} count={product.reviewCount} />
         <div className="mt-auto pt-1 flex items-baseline gap-2">
-          <span className="text-base font-bold">{formatPrice(product.price)}</span>
+          <span className="text-base font-bold">
+            <Price amount={product.price} />
+          </span>
           {product.compareAt && product.compareAt > product.price && (
-            <span className="text-xs text-[var(--muted)] line-through">{formatPrice(product.compareAt)}</span>
+            <span className="text-xs text-[var(--muted)] line-through">
+              <Price amount={product.compareAt} />
+            </span>
           )}
         </div>
         <p className={`text-[11px] ${product.stock > 0 ? "text-[var(--foreground)]" : "text-[var(--signal)]"}`}>

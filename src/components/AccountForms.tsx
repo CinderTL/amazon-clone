@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Select } from "@/components/ui/Form";
+import { useTheme } from "@/components/ThemeProvider";
 
 export function ProfileForm({
   user,
@@ -11,20 +12,25 @@ export function ProfileForm({
   user: { name: string; email: string; phone: string | null; themePref: string | null };
 }) {
   const router = useRouter();
+  const { setTheme } = useTheme();
   const [message, setMessage] = useState("");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
+    const themePref = String(form.get("themePref") || "light");
     const res = await fetch("/api/account/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: form.get("name"),
         phone: form.get("phone") || null,
-        themePref: form.get("themePref") || null,
+        themePref,
       }),
     });
+    if (res.ok && (themePref === "light" || themePref === "dark" || themePref === "system")) {
+      setTheme(themePref);
+    }
     setMessage(res.ok ? "Saved" : "Could not save");
     router.refresh();
   }
@@ -45,7 +51,7 @@ export function ProfileForm({
       </div>
       <div>
         <Label>Theme preference</Label>
-        <Select name="themePref" defaultValue={user.themePref || "system"}>
+        <Select name="themePref" defaultValue={user.themePref || "light"}>
           <option value="system">System</option>
           <option value="light">Light</option>
           <option value="dark">Dark</option>

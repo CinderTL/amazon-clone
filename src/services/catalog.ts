@@ -17,7 +17,7 @@ export type ProductListParams = {
 export async function listProducts(params: ProductListParams) {
   const page = Math.max(1, params.page ?? 1);
   const pageSize = Math.min(48, Math.max(1, params.pageSize ?? 24));
-  const where: Prisma.ProductWhereInput = { active: true };
+  const where: Prisma.ProductWhereInput = { active: true, status: "PUBLISHED" };
 
   if (params.q) {
     where.OR = [
@@ -116,7 +116,7 @@ export async function getProductBySlug(slug: string) {
       reviews: {
         include: { user: { select: { id: true, name: true } } },
         orderBy: { createdAt: "desc" },
-        take: 20,
+        take: 50,
       },
     },
   });

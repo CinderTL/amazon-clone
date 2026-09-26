@@ -134,7 +134,7 @@ export async function confirmCheckout(userId: string, orderId: string, paymentIn
         });
       }
       const product = await tx.product.findUnique({ where: { id: item.productId } });
-      if (!product || product.stock < item.quantity) {
+      if (!product || !product.active || product.status !== "PUBLISHED" || product.stock < item.quantity) {
         throw new Error(`Insufficient stock for ${item.name}`);
       }
       await tx.product.update({

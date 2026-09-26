@@ -31,14 +31,9 @@ export default async function CategoryPage({
   });
 
   return (
-    <div className="w-full">
-      <section className="w-full border-b border-[var(--border)] bg-[var(--surface)] py-10">
-        <div className="w-full px-4 md:px-8 lg:px-12">
-          <h1 className="font-heading text-4xl font-extrabold">{category.name}</h1>
-          {category.description && <p className="mt-2 text-[var(--muted)] max-w-xl">{category.description}</p>}
-        </div>
-      </section>
-      <div className="w-full px-4 md:px-8 lg:px-12 py-8 grid lg:grid-cols-[240px_1fr] gap-6">
+    <div className="w-full px-4 py-8 md:px-8 lg:px-12">
+      <h1 className="font-heading text-4xl font-extrabold">{category.name}</h1>
+      <div className="mt-6 grid w-full gap-6 lg:grid-cols-[240px_1fr]">
         <ProductFilters />
         <ProductGrid products={data.items} />
       </div>

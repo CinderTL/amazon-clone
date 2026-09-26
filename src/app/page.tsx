@@ -1,7 +1,10 @@
 import { prisma } from "@/lib/db";
+import { getSession } from "@/lib/auth";
 import { DealCarousel, type DealSlide } from "@/components/DealCarousel";
 import { PopularCategoryStrips } from "@/components/PopularCategoryStrips";
 import { ProductBrowse } from "@/components/ProductBrowse";
+import { RecommendationRails } from "@/components/RecommendationRails";
+import { homepageRails } from "@/services/recommendations";
 
 export const dynamic = "force-dynamic";
 
@@ -18,26 +21,27 @@ export default async function HomePage() {
     const best = await prisma.product.findFirst({
       where: {
         active: true,
+        status: "PUBLISHED",
         categoryId: { in: ids },
         compareAt: { not: null },
       },
       orderBy: [{ featured: "desc" }, { rating: "desc" }],
     });
-    const fallback =
-      best ||
+    const deal =
+      best ??
       (await prisma.product.findFirst({
-        where: { active: true, categoryId: { in: ids } },
+        where: { active: true, status: "PUBLISHED", categoryId: { in: ids } },
         orderBy: { rating: "desc" },
       }));
-    if (fallback) {
+    if (deal) {
       deals.push({
-        id: fallback.id,
-        name: fallback.name,
-        slug: fallback.slug,
-        description: fallback.description,
-        price: fallback.price,
-        compareAt: fallback.compareAt,
-        imageUrl: fallback.imageUrl,
+        id: deal.id,
+        name: deal.name,
+        slug: deal.slug,
+        description: deal.description,
+        price: deal.price,
+        compareAt: deal.compareAt,
+        imageUrl: deal.imageUrl,
         categoryName: cat.name,
         categorySlug: cat.slug,
       });
@@ -54,13 +58,16 @@ export default async function HomePage() {
   const pageSize = 12;
   const [initialProducts, total] = await Promise.all([
     prisma.product.findMany({
-      where: { active: true },
+      where: { active: true, status: "PUBLISHED" },
       take: pageSize,
       include: { category: true, seller: true },
       orderBy: { createdAt: "desc" },
     }),
-    prisma.product.count({ where: { active: true } }),
+    prisma.product.count({ where: { active: true, status: "PUBLISHED" } }),
   ]);
+
+  const session = await getSession();
+  const rails = await homepageRails(session?.userId ?? null);
 
   return (
     <div className="w-full">
@@ -73,6 +80,7 @@ export default async function HomePage() {
         }))}
       />
       <DealCarousel deals={deals} />
+      <RecommendationRails rails={rails} />
       <ProductBrowse initialProducts={initialProducts} initialTotal={total} pageSize={pageSize} />
     </div>
   );

@@ -88,14 +88,24 @@ export function CategoriesOverlay({
       className="lx-overlay fixed inset-0 z-[80] flex h-dvh w-screen flex-col bg-[var(--canvas)] text-[var(--foreground)]"
     >
       <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-3 md:px-6">
-        <h2 id={titleId} className="font-heading text-xl font-extrabold">
-          Categories
-        </h2>
+        <div className="group/title flex items-center">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close categories"
+            className="lx-focus inline-flex h-9 w-0 items-center justify-center overflow-hidden rounded opacity-0 transition-all hover:bg-[var(--elevated)] group-hover/title:w-9 group-hover/title:opacity-100 group-focus-within/title:w-9 group-focus-within/title:opacity-100"
+          >
+            <X className="h-5 w-5 shrink-0" aria-hidden />
+          </button>
+          <h2 id={titleId} className="font-heading text-xl font-extrabold">
+            Categories
+          </h2>
+        </div>
         <button
           ref={closeRef}
           type="button"
           onClick={onClose}
-          className="lx-focus inline-flex items-center gap-2 rounded border border-[var(--border)] px-3 py-2 text-sm font-semibold hover:bg-[var(--canvas)]"
+          className="lx-focus inline-flex items-center gap-2 rounded border border-[var(--border)] px-3 py-2 text-sm font-semibold hover:bg-[var(--elevated)]"
         >
           <X className="h-4 w-4" aria-hidden />
           Close

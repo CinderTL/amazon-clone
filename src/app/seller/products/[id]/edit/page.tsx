@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { requireSeller } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { SellerShell } from "@/components/SellerNav";
-import { ProductForm } from "@/components/SellerForms";
+import { ProductEditor } from "@/components/seller/ProductEditor";
 import { listCategoryOptions } from "@/services/catalog";
 
 type Props = { params: Promise<{ id: string }> };
@@ -19,8 +19,26 @@ export default async function EditProductPage({ params }: Props) {
   if (!product) notFound();
 
   return (
-    <SellerShell current="/seller/products" title="Edit product">
-      <ProductForm categories={categories} product={product} />
+    <SellerShell current="/seller/products" title={product.status === "DRAFT" ? "Edit draft" : "Edit product"}>
+      <ProductEditor
+        categories={categories}
+        originCountry={seller.originCountry}
+        product={{
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          compareAt: product.compareAt,
+          stock: product.stock,
+          categoryId: product.categoryId,
+          brand: product.brand,
+          imageUrl: product.imageUrl,
+          images: product.images,
+          featured: product.featured,
+          shippingScope: product.shippingScope,
+          status: product.status,
+        }}
+      />
     </SellerShell>
   );
 }

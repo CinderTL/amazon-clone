@@ -5,133 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Textarea, Select } from "@/components/ui/Form";
-import { formatPrice } from "@/lib/utils";
+import { Price } from "@/components/CurrencyProvider";
 import { ProductImage } from "@/components/ProductImage";
 import { ConfirmDialog } from "@/components/ui/Dialog";
-
-export function ProductForm({
-  categories,
-  product,
-}: {
-  categories: { id: string; name: string }[];
-  product?: {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    compareAt: number | null;
-    stock: number;
-    categoryId: string;
-    brand: string | null;
-    imageUrl: string;
-    active: boolean;
-    featured: boolean;
-  };
-}) {
-  const router = useRouter();
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    const form = new FormData(e.currentTarget);
-    const payload = {
-      name: String(form.get("name")),
-      description: String(form.get("description")),
-      price: Number(form.get("price")),
-      compareAt: form.get("compareAt") ? Number(form.get("compareAt")) : null,
-      stock: Number(form.get("stock")),
-      categoryId: String(form.get("categoryId")),
-      brand: String(form.get("brand") || "") || undefined,
-      imageUrl: String(form.get("imageUrl")),
-      featured: form.get("featured") === "on",
-      active: form.get("active") !== "off",
-    };
-
-    const res = await fetch(product ? `/api/seller/products/${product.id}` : "/api/seller/products", {
-      method: product ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    setLoading(false);
-    if (!res.ok) {
-      setError(data.error || "Save failed");
-      return;
-    }
-    router.push("/seller/products");
-    router.refresh();
-  }
-
-  return (
-    <form onSubmit={onSubmit} className="lx-card p-5 space-y-3 max-w-2xl">
-      {error && <p className="text-sm text-[var(--signal)]">{error}</p>}
-      <div>
-        <Label htmlFor="name">Product name</Label>
-        <Input id="name" name="name" defaultValue={product?.name} required />
-      </div>
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea id="description" name="description" defaultValue={product?.description} required />
-      </div>
-      <div className="grid sm:grid-cols-3 gap-3">
-        <div>
-          <Label htmlFor="price">Price</Label>
-          <Input id="price" name="price" type="number" step="0.01" defaultValue={product?.price ?? ""} required />
-        </div>
-        <div>
-          <Label htmlFor="compareAt">Compare at</Label>
-          <Input id="compareAt" name="compareAt" type="number" step="0.01" defaultValue={product?.compareAt ?? ""} />
-        </div>
-        <div>
-          <Label htmlFor="stock">Stock</Label>
-          <Input id="stock" name="stock" type="number" defaultValue={product?.stock ?? 0} required />
-        </div>
-      </div>
-      <div className="grid sm:grid-cols-2 gap-3">
-        <div>
-          <Label htmlFor="categoryId">Category</Label>
-          <Select id="categoryId" name="categoryId" defaultValue={product?.categoryId} required>
-            <option value="">Select…</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="brand">Brand</Label>
-          <Input id="brand" name="brand" defaultValue={product?.brand ?? ""} />
-        </div>
-      </div>
-      <div>
-        <Label htmlFor="imageUrl">Image URL</Label>
-        <Input
-          id="imageUrl"
-          name="imageUrl"
-          defaultValue={product?.imageUrl ?? "https://picsum.photos/seed/newproduct/600/600"}
-          required
-        />
-      </div>
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" name="featured" defaultChecked={product?.featured} /> Featured
-      </label>
-      <div className="flex gap-2">
-        <Button type="submit" disabled={loading}>
-          {loading ? "Saving…" : "Save product"}
-        </Button>
-        <Link href="/seller/products">
-          <Button type="button" variant="secondary">
-            Cancel
-          </Button>
-        </Link>
-      </div>
-    </form>
-  );
-}
 
 export function ProductTable({
   products,
@@ -143,6 +19,7 @@ export function ProductTable({
     price: number;
     stock: number;
     active: boolean;
+    status: "DRAFT" | "PUBLISHED";
   }[];
 }) {
   const router = useRouter();
@@ -188,12 +65,14 @@ export function ProductTable({
                     <span className="font-medium">{p.name}</span>
                   </div>
                 </td>
-                <td className="p-3">{formatPrice(p.price)}</td>
+                <td className="p-3">
+                  <Price amount={p.price} />
+                </td>
                 <td className="p-3">{p.stock}</td>
-                <td className="p-3">{p.active ? "Active" : "Hidden"}</td>
+                <td className="p-3">{p.status === "DRAFT" ? "Draft" : "Published"}</td>
                 <td className="p-3 text-right space-x-2">
                   <Link href={`/seller/products/${p.id}/edit`} className="text-[var(--signal)]">
-                    Edit
+                    {p.status === "DRAFT" ? "Continue" : "Edit"}
                   </Link>
                   <button type="button" className="lx-focus text-[var(--signal)]" onClick={() => setPendingDelete(p.id)}>
                     Delete
@@ -309,7 +188,7 @@ export function SellerOrdersList({
           <ul className="text-sm text-[var(--muted)] mt-3 space-y-1">
             {o.items.map((item, idx) => (
               <li key={idx}>
-                {item.name} × {item.quantity} — {formatPrice(item.price * item.quantity)}
+                {item.name} × {item.quantity} — <Price amount={item.price * item.quantity} />
               </li>
             ))}
           </ul>

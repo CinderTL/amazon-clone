@@ -1,28 +1,38 @@
 import { z } from "zod";
+import { ShippingScope } from "@/generated/prisma/client";
 import { handleApiError, jsonOk, readJson } from "@/lib/api";
 import { requireApiSeller } from "@/lib/session";
-import { deleteSellerProduct, getSellerForUser, updateSellerProduct } from "@/services/seller";
+import { deleteSellerProduct, getSellerForUser, updateSellerProduct, updateSellerStock } from "@/services/seller";
 
 const schema = z.object({
-  name: z.string().min(2).optional(),
-  description: z.string().min(10).optional(),
-  price: z.number().positive().optional(),
+  name: z.string().trim().min(2).max(160),
+  description: z.string().trim().max(8000).optional(),
+  price: z.number().min(0).optional(),
   compareAt: z.number().positive().nullable().optional(),
   stock: z.number().int().min(0).optional(),
-  imageUrl: z.string().url().optional(),
-  images: z.array(z.string().url()).optional(),
-  brand: z.string().nullable().optional(),
-  categoryId: z.string().optional(),
+  images: z.array(z.string()).max(8).optional(),
+  brand: z.string().trim().max(80).nullable().optional(),
+  categoryId: z.string().nullable().optional(),
   featured: z.boolean().optional(),
-  active: z.boolean().optional(),
+  shippingScope: z.enum([ShippingScope.INTERNATIONAL, ShippingScope.NATIONAL]).optional(),
+  intent: z.enum(["draft", "publish"]),
 });
+
+const stockSchema = z.object({
+  stock: z.number().int().min(0),
+}).strict();
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const session = await requireApiSeller();
     const seller = await getSellerForUser(session.userId);
     const { id } = await context.params;
-    const body = schema.parse(await readJson(request));
+    const payload = await readJson<Record<string, unknown>>(request);
+    if (stockSchema.safeParse(payload).success) {
+      const product = await updateSellerStock(seller.id, id, stockSchema.parse(payload).stock);
+      return jsonOk({ product });
+    }
+    const body = schema.parse(payload);
     const product = await updateSellerProduct(seller.id, id, body);
     return jsonOk({ product });
   } catch (error) {

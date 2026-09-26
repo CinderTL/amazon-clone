@@ -13,10 +13,6 @@ export type CatalogCategory = {
   children: CatalogChild[];
 };
 
-export function categoryImage(slug: string) {
-  return `https://picsum.photos/seed/lixazon-${slug}/800/800`;
-}
-
 export const CATEGORY_CATALOG: CatalogCategory[] = [
   {
     name: "Electronic Accessories",

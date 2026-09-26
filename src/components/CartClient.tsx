@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { formatPrice } from "@/lib/utils";
+import { useCurrency } from "@/components/CurrencyProvider";
 import { Button } from "@/components/ui/Button";
 import { ProductImage } from "@/components/ProductImage";
 
@@ -25,6 +25,7 @@ type Totals = { subtotal: number; shipping: number; tax: number; total: number; 
 
 export function CartClient({ initialItems, initialTotals }: { initialItems: CartItem[]; initialTotals: Totals }) {
   const router = useRouter();
+  const { format } = useCurrency();
   const [items, setItems] = useState(initialItems);
   const [totals, setTotals] = useState(initialTotals);
   const [busy, setBusy] = useState<string | null>(null);
@@ -68,7 +69,7 @@ export function CartClient({ initialItems, initialTotals }: { initialItems: Cart
                   {item.product.name}
                 </Link>
                 {item.variant && <p className="text-xs text-[var(--muted)]">{item.variant.name}</p>}
-                <p className="font-bold mt-1">{formatPrice(unit)}</p>
+                <p className="font-bold mt-1">{format(unit)}</p>
                 <div className="mt-2 flex items-center gap-2">
                   <Button
                     size="sm"
@@ -109,7 +110,7 @@ export function CartClient({ initialItems, initialTotals }: { initialItems: Cart
                   </Button>
                 </div>
               </div>
-              <div className="font-semibold">{formatPrice(unit * item.quantity)}</div>
+              <div className="font-semibold">{format(unit * item.quantity)}</div>
             </div>
           );
         })}
@@ -119,19 +120,19 @@ export function CartClient({ initialItems, initialTotals }: { initialItems: Cart
         <dl className="mt-4 space-y-2 text-sm">
           <div className="flex justify-between">
             <dt>Subtotal ({totals.itemCount})</dt>
-            <dd>{formatPrice(totals.subtotal)}</dd>
+            <dd>{format(totals.subtotal)}</dd>
           </div>
           <div className="flex justify-between">
             <dt>Shipping</dt>
-            <dd>{totals.shipping === 0 ? "Free" : formatPrice(totals.shipping)}</dd>
+            <dd>{totals.shipping === 0 ? "Free" : format(totals.shipping)}</dd>
           </div>
           <div className="flex justify-between">
             <dt>Tax est.</dt>
-            <dd>{formatPrice(totals.tax)}</dd>
+            <dd>{format(totals.tax)}</dd>
           </div>
           <div className="flex justify-between font-bold text-base pt-2 border-t border-[var(--border)]">
             <dt>Total</dt>
-            <dd>{formatPrice(totals.total)}</dd>
+            <dd>{format(totals.total)}</dd>
           </div>
         </dl>
         <Link href="/checkout" className="block mt-5">

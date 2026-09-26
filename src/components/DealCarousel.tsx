@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { formatPrice } from "@/lib/utils";
+import { useCurrency } from "@/components/CurrencyProvider";
 import { Button } from "@/components/ui/Button";
 import { ProductImage } from "@/components/ProductImage";
 
@@ -20,6 +20,7 @@ export type DealSlide = {
 };
 
 export function DealCarousel({ deals }: { deals: DealSlide[] }) {
+  const { format } = useCurrency();
   const [index, setIndex] = useState(0);
   const count = deals.length;
 
@@ -59,9 +60,9 @@ export function DealCarousel({ deals }: { deals: DealSlide[] }) {
           </h2>
           <p className="mt-3 text-sm md:text-base text-canvas/85 max-w-lg line-clamp-3">{deal.description}</p>
           <div className="mt-5 flex items-baseline gap-3">
-            <span className="text-3xl md:text-4xl font-extrabold">{formatPrice(deal.price)}</span>
+            <span className="text-3xl md:text-4xl font-extrabold">{format(deal.price)}</span>
             {deal.compareAt && deal.compareAt > deal.price && (
-              <span className="text-lg line-through text-canvas/60">{formatPrice(deal.compareAt)}</span>
+              <span className="text-lg line-through text-canvas/60">{format(deal.compareAt)}</span>
             )}
             {discount != null && (
               <span className="rounded bg-[var(--canvas)] text-[var(--signal)] text-xs font-bold px-2.5 py-1">-{discount}%</span>

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { formatDate, formatPrice } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
+import { Price } from "@/components/CurrencyProvider";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,9 @@ export default async function OrdersPage() {
                 <p className="text-sm text-[var(--muted)]">{formatDate(order.createdAt)}</p>
               </div>
               <div className="text-right">
-                <p className="font-bold">{formatPrice(order.total)}</p>
+                <p className="font-bold">
+                  <Price amount={order.total} />
+                </p>
                 <p className="text-xs text-[var(--muted)]">
                   {order.status} · {order.paymentStatus}
                 </p>

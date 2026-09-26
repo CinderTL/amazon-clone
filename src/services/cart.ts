@@ -30,7 +30,7 @@ export function cartTotals(items: { quantity: number; product: { price: number }
 
 export async function addCartItem(userId: string, productId: string, quantity: number, variantId?: string | null) {
   const product = await prisma.product.findFirst({
-    where: { id: productId, active: true },
+    where: { id: productId, active: true, status: "PUBLISHED" },
     include: { variants: true },
   });
   if (!product) throw new Error("NOT_FOUND");

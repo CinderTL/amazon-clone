@@ -1,6 +1,22 @@
+import { ApiError } from "@/lib/api";
 import { prisma } from "@/lib/db";
 import { slugify } from "@/lib/utils";
-import { OrderStatus } from "@/generated/prisma/client";
+import { assertStoredUploads } from "@/lib/uploads";
+import { OrderStatus, ProductStatus, ShippingScope } from "@/generated/prisma/client";
+
+export type SellerProductInput = {
+  name: string;
+  description?: string;
+  price?: number;
+  compareAt?: number | null;
+  stock?: number;
+  images?: string[];
+  brand?: string | null;
+  categoryId?: string | null;
+  featured?: boolean;
+  shippingScope?: ShippingScope;
+  intent: "draft" | "publish";
+};
 
 export async function getSellerForUser(userId: string) {
   const seller = await prisma.sellerProfile.findUnique({ where: { userId } });
@@ -16,55 +32,80 @@ export async function listSellerProducts(sellerId: string) {
   });
 }
 
-export async function createSellerProduct(
-  sellerId: string,
-  data: {
-    name: string;
-    description: string;
-    price: number;
-    compareAt?: number | null;
-    stock: number;
-    imageUrl: string;
-    images?: string[];
-    brand?: string;
-    categoryId: string;
-    featured?: boolean;
-  }
-) {
-  let slug = slugify(data.name);
+async function uniqueSlug(name: string, currentId?: string) {
+  let slug = slugify(name) || "product";
   const exists = await prisma.product.findUnique({ where: { slug } });
-  if (exists) slug = `${slug}-${Date.now().toString(36)}`;
+  if (exists && exists.id !== currentId) slug = `${slug}-${Date.now().toString(36)}`;
+  return slug;
+}
 
+async function productWriteData(sellerId: string, input: SellerProductInput) {
+  const seller = await prisma.sellerProfile.findUnique({ where: { id: sellerId } });
+  if (!seller) throw new Error("FORBIDDEN");
+
+  const images = input.images ?? [];
+  const shippingScope = input.shippingScope ?? ShippingScope.INTERNATIONAL;
+  const publishing = input.intent === "publish";
+
+  if (publishing) {
+    if (input.name.trim().length < 2) throw new ApiError("Add a product name before publishing");
+    if ((input.description ?? "").trim().length < 10) throw new ApiError("Add a description of at least 10 characters before publishing");
+    if (!input.price || input.price <= 0) throw new ApiError("Add a price greater than 0 before publishing");
+    if (input.stock == null || input.stock < 0) throw new ApiError("Add a stock quantity before publishing");
+    if (!input.categoryId) throw new ApiError("Choose a category before publishing");
+    if (!images.length) throw new ApiError("Upload at least one product image before publishing");
+    if (input.compareAt != null && input.compareAt <= input.price) {
+      throw new ApiError("Compare-at price must be higher than the selling price");
+    }
+    if (shippingScope === ShippingScope.NATIONAL && !seller.originCountry) {
+      throw new ApiError("Enable your shipping location before publishing a national product");
+    }
+  }
+
+  if (images.length) await assertStoredUploads(images);
+  if (input.categoryId) {
+    const category = await prisma.category.findUnique({ where: { id: input.categoryId } });
+    if (!category) throw new ApiError("Choose a valid category");
+  }
+
+  return {
+    name: input.name.trim(),
+    description: (input.description ?? "").trim(),
+    price: input.price ?? 0,
+    compareAt: input.compareAt ?? null,
+    stock: input.stock ?? 0,
+    images,
+    imageUrl: images[0] ?? "",
+    brand: input.brand?.trim() || null,
+    categoryId: input.categoryId || null,
+    featured: Boolean(input.featured),
+    shippingScope,
+    originCountry: shippingScope === ShippingScope.NATIONAL ? seller.originCountry : null,
+    status: publishing ? ProductStatus.PUBLISHED : ProductStatus.DRAFT,
+    active: publishing,
+  };
+}
+
+export async function createSellerProduct(sellerId: string, input: SellerProductInput) {
+  const data = await productWriteData(sellerId, input);
+  const slug = await uniqueSlug(data.name);
   return prisma.product.create({
-    data: {
-      ...data,
-      slug,
-      images: data.images?.length ? data.images : [data.imageUrl],
-      sellerId,
-    },
+    data: { ...data, slug, sellerId },
   });
 }
 
-export async function updateSellerProduct(
-  sellerId: string,
-  productId: string,
-  data: Partial<{
-    name: string;
-    description: string;
-    price: number;
-    compareAt: number | null;
-    stock: number;
-    imageUrl: string;
-    images: string[];
-    brand: string | null;
-    categoryId: string;
-    featured: boolean;
-    active: boolean;
-  }>
-) {
+export async function updateSellerProduct(sellerId: string, productId: string, input: SellerProductInput) {
   const product = await prisma.product.findFirst({ where: { id: productId, sellerId } });
   if (!product) throw new Error("NOT_FOUND");
-  return prisma.product.update({ where: { id: productId }, data });
+  const data = await productWriteData(sellerId, input);
+  const slug = product.name === data.name ? product.slug : await uniqueSlug(data.name, product.id);
+  return prisma.product.update({ where: { id: productId }, data: { ...data, slug } });
+}
+
+export async function updateSellerStock(sellerId: string, productId: string, stock: number) {
+  const product = await prisma.product.findFirst({ where: { id: productId, sellerId } });
+  if (!product) throw new Error("NOT_FOUND");
+  return prisma.product.update({ where: { id: productId }, data: { stock } });
 }
 
 export async function deleteSellerProduct(sellerId: string, productId: string) {
