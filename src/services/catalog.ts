@@ -130,6 +130,15 @@ export async function listCategories() {
   });
 }
 
+export async function listMarketplaceCategories() {
+  const categories = await listCategories();
+  return categories.map((category) => ({
+    id: category.id,
+    name: category.name,
+    children: category.children.map((child) => ({ id: child.id, name: child.name })),
+  }));
+}
+
 export async function listCategoryOptions() {
   const categories = await prisma.category.findMany({
     where: { children: { none: {} }, sellerId: null },

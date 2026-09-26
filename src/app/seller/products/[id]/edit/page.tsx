@@ -3,7 +3,7 @@ import { requireSeller } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { SellerShell } from "@/components/SellerNav";
 import { ProductEditor } from "@/components/seller/ProductEditor";
-import { listSellerCategories } from "@/services/store-categories";
+import { listMarketplaceCategories } from "@/services/catalog";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -14,14 +14,14 @@ export default async function EditProductPage({ params }: Props) {
   const { id } = await params;
   const [product, categories] = await Promise.all([
     prisma.product.findFirst({ where: { id, sellerId: seller.id } }),
-    listSellerCategories(seller.id),
+    listMarketplaceCategories(),
   ]);
   if (!product) notFound();
 
   return (
     <SellerShell current="/seller/products" title={product.status === "DRAFT" ? "Edit draft" : "Edit product"}>
       <ProductEditor
-        categories={categories.map((category) => ({ id: category.id, name: category.name }))}
+        categories={categories}
         originCountry={seller.originCountry}
         product={{
           id: product.id,

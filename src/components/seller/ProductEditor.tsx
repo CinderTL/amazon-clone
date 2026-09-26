@@ -9,7 +9,18 @@ import { Input, Label, Select, Textarea } from "@/components/ui/Form";
 import { ProductImage } from "@/components/ProductImage";
 import { isProductImageSource, isRemoteImageUrl } from "@/lib/upload-path";
 
-type CategoryOption = { id: string; name: string };
+type CategoryOption = { id: string; name: string; children: { id: string; name: string }[] };
+
+function selectionFor(categories: CategoryOption[], categoryId: string | null | undefined) {
+  if (!categoryId) return { departmentId: "", subcategoryId: "" };
+  for (const category of categories) {
+    if (category.id === categoryId) return { departmentId: category.id, subcategoryId: "" };
+    if (category.children.some((child) => child.id === categoryId)) {
+      return { departmentId: category.id, subcategoryId: categoryId };
+    }
+  }
+  return { departmentId: "", subcategoryId: "" };
+}
 
 type ProductDraft = {
   id: string;
@@ -56,6 +67,10 @@ export function ProductEditor({
   const [uploading, setUploading] = useState(false);
   const [locating, setLocating] = useState(false);
   const [saving, setSaving] = useState<"draft" | "publish" | null>(null);
+  const initialCategory = selectionFor(categories, product?.categoryId);
+  const [departmentId, setDepartmentId] = useState(initialCategory.departmentId);
+  const [subcategoryId, setSubcategoryId] = useState(initialCategory.subcategoryId);
+  const subcategories = categories.find((category) => category.id === departmentId)?.children ?? [];
 
   async function uploadFiles(list: FileList | null) {
     if (!list?.length) return;
@@ -177,7 +192,7 @@ export function ProductEditor({
       price: form.get("price") === "" ? 0 : Number(form.get("price")),
       compareAt: form.get("compareAt") ? Number(form.get("compareAt")) : null,
       stock: form.get("stock") === "" ? 0 : Number(form.get("stock")),
-      categoryId: String(form.get("categoryId") || "") || null,
+      categoryId: subcategoryId || null,
       brand: String(form.get("brand") || "") || null,
       featured: form.get("featured") === "on",
       images,
@@ -190,7 +205,8 @@ export function ProductEditor({
       if (payload.name.trim().length < 2) return setError("Add a product name before publishing");
       if (payload.description.trim().length < 10) return setError("Add a description of at least 10 characters before publishing");
       if (!payload.price || payload.price <= 0) return setError("Add a price greater than 0 before publishing");
-      if (!payload.categoryId) return setError("Choose a category before publishing");
+      if (!departmentId) return setError("Choose a category before publishing");
+      if (!payload.categoryId) return setError("Choose a subcategory before publishing");
       if (!images.length) return setError("Add at least one image before publishing");
       if (shippingScope === "NATIONAL" && !country) return setError("Enable your shipping location before publishing a national product");
     }
@@ -250,10 +266,17 @@ export function ProductEditor({
                 <Input id="stock" name="stock" type="number" min="0" defaultValue={product?.stock ?? 0} />
               </div>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-3">
               <div>
-                <Label htmlFor="categoryId">Category</Label>
-                <Select id="categoryId" name="categoryId" defaultValue={product?.categoryId ?? ""}>
+                <Label htmlFor="departmentId">Category</Label>
+                <Select
+                  id="departmentId"
+                  value={departmentId}
+                  onChange={(event) => {
+                    setDepartmentId(event.target.value);
+                    setSubcategoryId("");
+                  }}
+                >
                   <option value="">Select…</option>
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
@@ -262,14 +285,25 @@ export function ProductEditor({
                   ))}
                 </Select>
                 {categories.length === 0 && (
-                  <p className="mt-1 text-xs text-[var(--muted)]">
-                    No store categories yet.{" "}
-                    <Link href="/seller/categories" className="text-[var(--signal)]">
-                      Create one
-                    </Link>{" "}
-                    before you publish.
-                  </p>
+                  <p className="mt-1 text-xs text-[var(--muted)]">Website categories are not set up yet.</p>
                 )}
+              </div>
+              <div>
+                <Label htmlFor="subcategoryId">Subcategory</Label>
+                <Select
+                  id="subcategoryId"
+                  name="subcategoryId"
+                  value={subcategoryId}
+                  disabled={!departmentId}
+                  onChange={(event) => setSubcategoryId(event.target.value)}
+                >
+                  <option value="">Select…</option>
+                  {subcategories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </Select>
               </div>
               <div>
                 <Label htmlFor="brand">Brand</Label>

@@ -56,6 +56,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 | `npm run db:migrate` | Apply Prisma migrations |
 | `npm run db:essentials` | Create or update marketplace categories. Leaves accounts and seller data in place. |
 | `npm run db:seed` | Same as `db:essentials` |
+| `npm run db:seed:lixtools` | Add the LixTools computer products to that seller |
 | `npm run db:clean -- --yes` | Remove hardcoded mock accounts, stores, products, and unused legacy categories |
 | `npm run db:setup` | Docker up + migrate + essentials |
 

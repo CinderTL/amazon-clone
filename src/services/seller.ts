@@ -52,7 +52,7 @@ async function productWriteData(sellerId: string, input: SellerProductInput) {
     if ((input.description ?? "").trim().length < 10) throw new ApiError("Add a description of at least 10 characters before publishing");
     if (!input.price || input.price <= 0) throw new ApiError("Add a price greater than 0 before publishing");
     if (input.stock == null || input.stock < 0) throw new ApiError("Add a stock quantity before publishing");
-    if (!input.categoryId) throw new ApiError("Choose a category before publishing");
+    if (!input.categoryId) throw new ApiError("Choose a subcategory before publishing");
     if (!images.length) throw new ApiError("Add at least one product image before publishing");
     if (input.compareAt != null && input.compareAt <= input.price) {
       throw new ApiError("Compare-at price must be higher than the selling price");
@@ -64,8 +64,10 @@ async function productWriteData(sellerId: string, input: SellerProductInput) {
 
   if (images.length) await assertProductImages(images);
   if (input.categoryId) {
-    const category = await prisma.category.findFirst({ where: { id: input.categoryId, sellerId } });
-    if (!category) throw new ApiError("Choose a category you created for this store");
+    const category = await prisma.category.findFirst({
+      where: { id: input.categoryId, sellerId: null, parentId: { not: null } },
+    });
+    if (!category) throw new ApiError("Choose a website subcategory");
   }
 
   return {
