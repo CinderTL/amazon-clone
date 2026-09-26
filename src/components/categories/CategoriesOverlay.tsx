@@ -85,7 +85,7 @@ export function CategoriesOverlay({
       aria-modal="true"
       aria-labelledby={titleId}
       id="categories-overlay"
-      className="lx-overlay fixed inset-0 z-[80] flex h-dvh w-screen flex-col bg-[var(--bg)] text-[var(--text)]"
+      className="lx-overlay fixed inset-0 z-[80] flex h-dvh w-screen flex-col bg-[var(--canvas)] text-[var(--foreground)]"
     >
       <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-3 md:px-6">
         <h2 id={titleId} className="font-heading text-xl font-extrabold">
@@ -95,7 +95,7 @@ export function CategoriesOverlay({
           ref={closeRef}
           type="button"
           onClick={onClose}
-          className="lx-focus inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-3 py-2 text-sm font-semibold hover:bg-[var(--bg-page)]"
+          className="lx-focus inline-flex items-center gap-2 rounded border border-[var(--border)] px-3 py-2 text-sm font-semibold hover:bg-[var(--canvas)]"
         >
           <X className="h-4 w-4" aria-hidden />
           Close
@@ -111,7 +111,7 @@ export function CategoriesOverlay({
         <SubcategoryGrid
           category={selected}
           onNavigate={onClose}
-          className="min-h-0 flex-1 overflow-y-auto bg-[var(--bg-page)]"
+          className="min-h-0 flex-1 overflow-y-auto bg-[var(--canvas)]"
         />
       </div>
     </div>,

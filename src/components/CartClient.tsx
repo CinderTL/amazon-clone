@@ -60,14 +60,14 @@ export function CartClient({ initialItems, initialTotals }: { initialItems: Cart
           const unit = item.product.price + (item.variant?.priceDelta ?? 0);
           return (
             <div key={item.id} className="lx-card p-4 flex gap-4">
-              <div className="h-24 w-24 rounded-2xl overflow-hidden lx-module-sky shrink-0 relative">
+              <div className="h-24 w-24 rounded-2xl overflow-hidden bg-[var(--elevated)] shrink-0 relative">
                 <ProductImage src={item.product.imageUrl} alt={item.product.name} className="absolute inset-0 p-2" />
               </div>
               <div className="flex-1 min-w-0">
-                <Link href={`/product/${item.product.slug}`} className="font-medium hover:text-[var(--sky)]">
+                <Link href={`/product/${item.product.slug}`} className="font-medium hover:text-[var(--signal)]">
                   {item.product.name}
                 </Link>
-                {item.variant && <p className="text-xs text-[var(--text-muted)]">{item.variant.name}</p>}
+                {item.variant && <p className="text-xs text-[var(--muted)]">{item.variant.name}</p>}
                 <p className="font-bold mt-1">{formatPrice(unit)}</p>
                 <div className="mt-2 flex items-center gap-2">
                   <Button
@@ -135,7 +135,7 @@ export function CartClient({ initialItems, initialTotals }: { initialItems: Cart
           </div>
         </dl>
         <Link href="/checkout" className="block mt-5">
-          <Button className="w-full" size="lg" variant="coral">
+          <Button className="w-full" size="lg" variant="primary">
             Checkout
           </Button>
         </Link>

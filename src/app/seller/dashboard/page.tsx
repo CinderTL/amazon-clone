@@ -69,7 +69,7 @@ export default async function SellerDashboardPage() {
           { label: "Products", value: String(products) },
         ].map((s) => (
           <div key={s.label} className="lx-card p-4">
-            <p className="text-xs text-[var(--text-muted)] uppercase">{s.label}</p>
+            <p className="text-xs text-[var(--muted)] uppercase">{s.label}</p>
             <p className="text-xl font-bold mt-1">{s.value}</p>
           </div>
         ))}
@@ -83,13 +83,13 @@ export default async function SellerDashboardPage() {
         <div className="lx-card p-4">
           <h2 className="font-bold mb-3">Low stock alerts</h2>
           {lowStock.length === 0 ? (
-            <p className="text-sm text-[var(--text-muted)]">All products well stocked.</p>
+            <p className="text-sm text-[var(--muted)]">All products well stocked.</p>
           ) : (
             <ul className="space-y-2">
               {lowStock.map((p) => (
                 <li key={p.id} className="flex justify-between text-sm border-b border-[var(--border)] pb-2">
                   <span className="line-clamp-1 pr-2">{p.name}</span>
-                  <span className={p.stock <= 5 ? "text-[var(--coral)] font-bold" : "text-[var(--text-muted)]"}>
+                  <span className={p.stock <= 5 ? "text-[var(--signal)] font-bold" : "text-[var(--muted)]"}>
                     {p.stock} left
                   </span>
                 </li>
@@ -104,7 +104,7 @@ export default async function SellerDashboardPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-[var(--text-muted)] border-b border-[var(--border)]">
+              <tr className="text-left text-[var(--muted)] border-b border-[var(--border)]">
                 <th className="py-2 pr-2">Order</th>
                 <th className="py-2 pr-2">Product</th>
                 <th className="py-2 pr-2">Qty</th>
@@ -126,7 +126,7 @@ export default async function SellerDashboardPage() {
               ))}
               {recent.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-6 text-center text-[var(--text-muted)]">
+                  <td colSpan={6} className="py-6 text-center text-[var(--muted)]">
                     No orders yet
                   </td>
                 </tr>

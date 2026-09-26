@@ -41,7 +41,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
       <div className="grid lg:grid-cols-2 gap-8">
         <div className="lx-card p-4">
-          <div className="aspect-square rounded-2xl lx-module-sky relative overflow-hidden">
+          <div className="aspect-square rounded-2xl bg-[var(--elevated)] relative overflow-hidden">
             <ProductImage
               src={gallery[0]}
               alt={product.name}
@@ -53,7 +53,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           {gallery.length > 1 && (
             <div className="mt-3 grid grid-cols-4 gap-2">
               {gallery.slice(0, 4).map((src) => (
-                <div key={src} className="aspect-square rounded-xl overflow-hidden relative lx-module-mint">
+                <div key={src} className="aspect-square rounded-xl overflow-hidden relative bg-[var(--elevated)]">
                   <ProductImage src={src} alt="" className="absolute inset-0 p-2" imageClassName="object-contain" sizes="120px" />
                 </div>
               ))}
@@ -62,8 +62,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </div>
 
         <div>
-          <p className="text-sm text-[var(--text-muted)]">
-            <Link href={`/category/${product.category.slug}`} className="text-[var(--sky)]">
+          <p className="text-sm text-[var(--muted)]">
+            <Link href={`/category/${product.category.slug}`} className="text-[var(--signal)]">
               {product.category.name}
             </Link>
             {product.brand ? ` · ${product.brand}` : ""}
@@ -75,14 +75,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <div className="mt-4 flex items-baseline gap-3">
             <span className="text-3xl font-bold">{formatPrice(product.price)}</span>
             {product.compareAt && product.compareAt > product.price && (
-              <span className="text-[var(--text-muted)] line-through">{formatPrice(product.compareAt)}</span>
+              <span className="text-[var(--muted)] line-through">{formatPrice(product.compareAt)}</span>
             )}
           </div>
-          <p className="mt-4 text-[var(--text-muted)] leading-relaxed">{product.description}</p>
-          <p className={`mt-3 text-sm font-medium ${product.stock > 0 ? "text-[var(--mint)]" : "text-[var(--coral)]"}`}>
+          <p className="mt-4 text-[var(--muted)] leading-relaxed">{product.description}</p>
+          <p className={`mt-3 text-sm font-medium ${product.stock > 0 ? "text-[var(--foreground)]" : "text-[var(--signal)]"}`}>
             {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
           </p>
-          <p className="text-sm text-[var(--text-muted)] mt-1">Sold by {product.seller.storeName}</p>
+          <p className="text-sm text-[var(--muted)] mt-1">Sold by {product.seller.storeName}</p>
           <div className="mt-6">
             <AddToCartButton
               productId={product.id}
@@ -103,7 +103,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <div className="grid lg:grid-cols-[1fr_320px] gap-6">
           <div className="space-y-3">
             {product.reviews.length === 0 && (
-              <div className="lx-card p-6 text-[var(--text-muted)]">No reviews yet.</div>
+              <div className="lx-card p-6 text-[var(--muted)]">No reviews yet.</div>
             )}
             {product.reviews.map((r) => (
               <div key={r.id} className="lx-card p-4">
@@ -112,7 +112,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   <StarRating rating={r.rating} />
                 </div>
                 {r.title && <p className="font-semibold mt-1">{r.title}</p>}
-                {r.body && <p className="text-sm text-[var(--text-muted)] mt-1">{r.body}</p>}
+                {r.body && <p className="text-sm text-[var(--muted)] mt-1">{r.body}</p>}
               </div>
             ))}
           </div>
@@ -120,7 +120,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             {canReview ? (
               <ReviewForm productId={product.id} />
             ) : (
-              <div className="lx-card p-4 text-sm text-[var(--text-muted)]">
+              <div className="lx-card p-4 text-sm text-[var(--muted)]">
                 Purchase this product to leave a review.
               </div>
             )}

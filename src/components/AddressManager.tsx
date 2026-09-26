@@ -77,9 +77,9 @@ export function AddressManager({ initial }: { initial: Address[] }) {
             <div className="flex justify-between gap-2">
               <div>
                 <p className="font-semibold">
-                  {a.label} {a.isDefault && <span className="text-xs text-[var(--mint)]">Default</span>}
+                  {a.label} {a.isDefault && <span className="text-xs text-[var(--foreground)]">Default</span>}
                 </p>
-                <p className="text-sm text-[var(--text-muted)] mt-1">
+                <p className="text-sm text-[var(--muted)] mt-1">
                   {a.fullName}
                   <br />
                   {a.line1}
@@ -97,7 +97,7 @@ export function AddressManager({ initial }: { initial: Address[] }) {
       </div>
       <form onSubmit={create} className="lx-card p-5 space-y-3">
         <h2 className="font-heading font-bold">Add address</h2>
-        {error && <p className="text-sm text-[var(--coral)]">{error}</p>}
+        {error && <p className="text-sm text-[var(--signal)]">{error}</p>}
         <div>
           <Label>Label</Label>
           <Input name="label" defaultValue="Home" />

@@ -25,7 +25,7 @@ export function SellerShell({
       <h1 className="font-heading text-3xl font-extrabold mb-6">{title}</h1>
       <div className="flex flex-col md:flex-row gap-6">
         <aside className="lx-card p-3 w-full md:w-56 shrink-0 h-fit md:sticky md:top-28">
-          <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wide px-2 mb-2">Seller</p>
+          <p className="text-xs font-bold text-[var(--muted)] uppercase tracking-wide px-2 mb-2">Seller</p>
           <nav className="space-y-1">
             {links.map((l) => (
               <Link
@@ -33,14 +33,14 @@ export function SellerShell({
                 href={l.href}
                 className={cn(
                   "block px-3 py-2 rounded-xl text-sm",
-                  current === l.href ? "bg-[var(--sky-soft)] text-[var(--sky)] font-semibold" : "hover:bg-[var(--bg-page)]"
+                  current === l.href ? "bg-[var(--elevated)] text-[var(--signal)] font-semibold" : "hover:bg-[var(--canvas)]"
                 )}
               >
                 {l.label}
               </Link>
             ))}
           </nav>
-          <Link href="/" className="lx-focus mt-4 inline-flex items-center gap-1 px-2 text-xs text-[var(--sky)]">
+          <Link href="/" className="lx-focus mt-4 inline-flex items-center gap-1 px-2 text-xs text-[var(--signal)]">
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
             Back to shop
           </Link>

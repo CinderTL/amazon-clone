@@ -75,7 +75,7 @@ function FiltersInner() {
 
       <button
         type="button"
-        className="text-sm text-[var(--sky)]"
+        className="text-sm text-[var(--signal)]"
         onClick={() => {
           const q = searchParams.get("q");
           router.push(q ? `${pathname}?q=${encodeURIComponent(q)}` : pathname);

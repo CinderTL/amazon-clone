@@ -12,13 +12,13 @@ export function StarRating({ rating, count, size = "sm" }: { rating: number; cou
             key={i}
             className={cn(
               starSize,
-              i < full ? "fill-[var(--mustard)] text-[var(--mustard)]" : "fill-[var(--border)] text-[var(--border)]"
+              i < full ? "fill-[var(--signal)] text-[var(--signal)]" : "fill-[var(--border)] text-[var(--border)]"
             )}
           />
         ))}
       </div>
-      <span className="text-xs text-[var(--sky)]">{rating.toFixed(1)}</span>
-      {count != null && <span className="text-xs text-[var(--text-muted)]">({count.toLocaleString()})</span>}
+      <span className="text-xs text-[var(--signal)]">{rating.toFixed(1)}</span>
+      {count != null && <span className="text-xs text-[var(--muted)]">({count.toLocaleString()})</span>}
     </div>
   );
 }

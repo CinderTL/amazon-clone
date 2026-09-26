@@ -38,7 +38,7 @@ export function LoginForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      {error && <p className="text-sm text-[var(--coral)]">{error}</p>}
+      {error && <p className="text-sm text-[var(--signal)]">{error}</p>}
       <div>
         <Label htmlFor="email">Email</Label>
         <Input id="email" name="email" type="email" required defaultValue="customer@example.com" />
@@ -50,11 +50,11 @@ export function LoginForm() {
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Signing in…" : "Sign in"}
       </Button>
-      <p className="text-center text-sm text-[var(--text-muted)]">
+      <p className="text-center text-sm text-[var(--muted)]">
         New here?{" "}
         <Link
           href={next && next !== "/" ? `/register?next=${encodeURIComponent(next)}` : "/register"}
-          className="font-medium text-[var(--sky)]"
+          className="font-medium text-[var(--signal)]"
         >
           Create an account
         </Link>
@@ -96,7 +96,7 @@ export function RegisterForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      {error && <p className="text-sm text-[var(--coral)]">{error}</p>}
+      {error && <p className="text-sm text-[var(--signal)]">{error}</p>}
       <div>
         <Label htmlFor="name">Name</Label>
         <Input id="name" name="name" required />
@@ -112,9 +112,9 @@ export function RegisterForm() {
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Creating…" : "Create account"}
       </Button>
-      <p className="text-center text-sm text-[var(--text-muted)]">
+      <p className="text-center text-sm text-[var(--muted)]">
         Already have an account?{" "}
-        <Link href={next && next !== "/" ? `/login?next=${encodeURIComponent(next)}` : "/login"} className="font-medium text-[var(--sky)]">
+        <Link href={next && next !== "/" ? `/login?next=${encodeURIComponent(next)}` : "/login"} className="font-medium text-[var(--signal)]">
           Sign in
         </Link>
       </p>

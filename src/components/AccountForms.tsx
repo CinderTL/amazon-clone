@@ -51,7 +51,7 @@ export function ProfileForm({
           <option value="dark">Dark</option>
         </Select>
       </div>
-      {message && <p className="text-sm text-[var(--mint)]">{message}</p>}
+      {message && <p className="text-sm text-[var(--foreground)]">{message}</p>}
       <Button type="submit">Save profile</Button>
     </form>
   );

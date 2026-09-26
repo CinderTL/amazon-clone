@@ -6,10 +6,10 @@ export default function RegisterPage() {
     <div className="flex w-full flex-1 items-start justify-center px-4 py-6 md:items-center md:overflow-y-auto md:py-4">
       <div className="lx-card w-full max-w-md p-6 md:p-8">
         <h1 className="font-heading text-2xl font-extrabold">Create your Lixazon account</h1>
-        <p className="mb-6 mt-1 text-sm text-[var(--text-muted)]">
+        <p className="mb-6 mt-1 text-sm text-[var(--muted)]">
           New accounts start as customers. You can become a seller later from the header.
         </p>
-        <Suspense fallback={<p className="text-sm text-[var(--text-muted)]">Loading…</p>}>
+        <Suspense fallback={<p className="text-sm text-[var(--muted)]">Loading…</p>}>
           <RegisterForm />
         </Suspense>
       </div>

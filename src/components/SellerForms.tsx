@@ -67,7 +67,7 @@ export function ProductForm({
 
   return (
     <form onSubmit={onSubmit} className="lx-card p-5 space-y-3 max-w-2xl">
-      {error && <p className="text-sm text-[var(--coral)]">{error}</p>}
+      {error && <p className="text-sm text-[var(--signal)]">{error}</p>}
       <div>
         <Label htmlFor="name">Product name</Label>
         <Input id="name" name="name" defaultValue={product?.name} required />
@@ -169,7 +169,7 @@ export function ProductTable({
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-[var(--text-muted)] border-b border-[var(--border)] bg-[var(--bg-page)]">
+            <tr className="text-left text-[var(--muted)] border-b border-[var(--border)] bg-[var(--canvas)]">
               <th className="p-3">Product</th>
               <th className="p-3">Price</th>
               <th className="p-3">Stock</th>
@@ -192,10 +192,10 @@ export function ProductTable({
                 <td className="p-3">{p.stock}</td>
                 <td className="p-3">{p.active ? "Active" : "Hidden"}</td>
                 <td className="p-3 text-right space-x-2">
-                  <Link href={`/seller/products/${p.id}/edit`} className="text-[var(--sky)]">
+                  <Link href={`/seller/products/${p.id}/edit`} className="text-[var(--signal)]">
                     Edit
                   </Link>
-                  <button type="button" className="lx-focus text-[var(--coral)]" onClick={() => setPendingDelete(p.id)}>
+                  <button type="button" className="lx-focus text-[var(--signal)]" onClick={() => setPendingDelete(p.id)}>
                     Delete
                   </button>
                 </td>
@@ -203,7 +203,7 @@ export function ProductTable({
             ))}
             {products.length === 0 && (
               <tr>
-                <td colSpan={5} className="p-8 text-center text-[var(--text-muted)]">
+                <td colSpan={5} className="p-8 text-center text-[var(--muted)]">
                   No products yet.
                 </td>
               </tr>
@@ -256,7 +256,7 @@ export function InventoryEditor({
           />
         </div>
       ))}
-      {products.length === 0 && <p className="p-6 text-center text-[var(--text-muted)]">No products</p>}
+      {products.length === 0 && <p className="p-6 text-center text-[var(--muted)]">No products</p>}
     </div>
   );
 }
@@ -283,7 +283,7 @@ export function SellerOrdersList({
           <div className="flex flex-wrap justify-between gap-3">
             <div>
               <p className="font-bold">{o.orderNumber}</p>
-              <p className="text-xs text-[var(--text-muted)]">
+              <p className="text-xs text-[var(--muted)]">
                 {o.user.name} · {new Date(o.createdAt).toLocaleDateString()}
               </p>
             </div>
@@ -306,7 +306,7 @@ export function SellerOrdersList({
               ))}
             </Select>
           </div>
-          <ul className="text-sm text-[var(--text-muted)] mt-3 space-y-1">
+          <ul className="text-sm text-[var(--muted)] mt-3 space-y-1">
             {o.items.map((item, idx) => (
               <li key={idx}>
                 {item.name} × {item.quantity} — {formatPrice(item.price * item.quantity)}
@@ -315,7 +315,7 @@ export function SellerOrdersList({
           </ul>
         </div>
       ))}
-      {orders.length === 0 && <div className="lx-card p-8 text-center text-[var(--text-muted)]">No orders yet.</div>}
+      {orders.length === 0 && <div className="lx-card p-8 text-center text-[var(--muted)]">No orders yet.</div>}
     </div>
   );
 }
@@ -350,7 +350,7 @@ export function StoreProfileForm({
       <div>
         <Label>Store name</Label>
         <Input name="storeName" defaultValue={store.storeName} required />
-        <p className="text-sm text-[var(--text-muted)] mt-1">/store/{store.slug}</p>
+        <p className="text-sm text-[var(--muted)] mt-1">/store/{store.slug}</p>
       </div>
       <div>
         <Label>Description</Label>
@@ -364,7 +364,7 @@ export function StoreProfileForm({
         <Label>Banner URL</Label>
         <Input name="bannerUrl" defaultValue={store.bannerUrl || ""} />
       </div>
-      {message && <p className="text-sm text-[var(--mint)]">{message}</p>}
+      {message && <p className="text-sm text-[var(--foreground)]">{message}</p>}
       <Button type="submit">Save store</Button>
     </form>
   );

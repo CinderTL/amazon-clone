@@ -39,7 +39,7 @@ export function ProductBrowse({
       <div className="flex items-end justify-between gap-4 mb-6">
         <div>
           <h2 className="font-heading text-2xl md:text-3xl font-extrabold">Browse products</h2>
-          <p className="text-sm text-[var(--text-muted)] mt-1">A mixed feed from across the marketplace</p>
+          <p className="text-sm text-[var(--muted)] mt-1">A mixed feed from across the marketplace</p>
         </div>
       </div>
       <ProductGrid products={products} />

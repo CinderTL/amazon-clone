@@ -35,7 +35,7 @@ export function BecomeSellerForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      {error && <p className="text-sm text-[var(--coral)]">{error}</p>}
+      {error && <p className="text-sm text-[var(--signal)]">{error}</p>}
       <div>
         <Label htmlFor="storeName">Store name</Label>
         <Input id="storeName" name="storeName" required minLength={2} />

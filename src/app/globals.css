@@ -1,69 +1,49 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #ffffff;
-  --bg-page: #fafafa;
-  --surface: #ffffff;
-  --surface-elevated: #ffffff;
-  --text: #1a1a1a;
-  --text-muted: #6b7280;
-  --border: #e8e8e8;
-  --coral: #ff6b6b;
-  --sky: #4b7bff;
-  --mint: #2ec4b6;
-  --mustard: #f4a261;
-  --coral-soft: #ffe3e3;
-  --sky-soft: #e8efff;
-  --mint-soft: #dff7f4;
-  --mustard-soft: #fff0e0;
-  --shadow: 0 8px 24px rgba(26, 26, 26, 0.08);
-  --shadow-hover: 0 14px 32px rgba(26, 26, 26, 0.14);
-  --radius-card: 18px;
-  --radius-pill: 999px;
-  --ring: color-mix(in srgb, var(--sky) 35%, transparent);
+  --canvas: #fcfcfc;
+  --surface: #f7f7f7;
+  --elevated: #f1f1f1;
+  --border: #c8c8c8;
+  --disabled: #b0b0b0;
+  --muted: #8a8a8a;
+  --subtext: #8a8a8a;
+  --signal: #ff2600;
+  --foreground: #050505;
+  --ring: color-mix(in srgb, var(--signal) 8%, transparent);
   color-scheme: light;
 }
 
 .dark {
-  --bg: #121212;
-  --bg-page: #181818;
-  --surface: #1f1f1f;
-  --surface-elevated: #242424;
-  --text: #f2f2f2;
-  --text-muted: #a3a3a3;
+  --canvas: #050505;
+  --surface: #0d0d0d;
+  --elevated: #121212;
   --border: #2e2e2e;
-  --coral: #e07a7a;
-  --sky: #6b8fff;
-  --mint: #3aada3;
-  --mustard: #d4a06a;
-  --coral-soft: #3a2424;
-  --sky-soft: #1e2740;
-  --mint-soft: #1c3331;
-  --mustard-soft: #3a2f22;
-  --shadow: none;
-  --shadow-hover: none;
-  --ring: color-mix(in srgb, var(--sky) 45%, transparent);
+  --disabled: #525252;
+  --muted: #6e6e6e;
+  --subtext: #b3b3b3;
+  --signal: #ff2600;
+  --foreground: #fcfcfc;
+  --ring: color-mix(in srgb, var(--signal) 8%, transparent);
   color-scheme: dark;
 }
 
 @theme inline {
-  --color-lx-bg: var(--bg);
-  --color-lx-page: var(--bg-page);
-  --color-lx-surface: var(--surface);
-  --color-lx-elevated: var(--surface-elevated);
-  --color-lx-text: var(--text);
-  --color-lx-muted: var(--text-muted);
-  --color-lx-border: var(--border);
-  --color-lx-coral: var(--coral);
-  --color-lx-sky: var(--sky);
-  --color-lx-mint: var(--mint);
-  --color-lx-mustard: var(--mustard);
-  --color-lx-coral-soft: var(--coral-soft);
-  --color-lx-sky-soft: var(--sky-soft);
-  --color-lx-mint-soft: var(--mint-soft);
-  --color-lx-mustard-soft: var(--mustard-soft);
-  --font-heading: var(--font-heading);
-  --font-sans: var(--font-body);
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
+  --color-border: var(--border);
+  --color-disabled: var(--disabled);
+  --color-muted: var(--muted);
+  --color-subtext: var(--subtext);
+  --color-signal: var(--signal);
+  --color-foreground: var(--foreground);
+  --font-heading: var(--font-inter);
+  --font-sans: var(--font-inter);
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
 }
 
 html {
@@ -72,9 +52,9 @@ html {
 }
 
 body {
-  background: var(--bg-page);
-  color: var(--text);
-  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  background: var(--canvas);
+  color: var(--foreground);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   font-size: 14px;
   line-height: 1.5;
   margin: 0;
@@ -88,7 +68,7 @@ h2,
 h3,
 h4,
 .font-heading {
-  font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 a {
@@ -104,55 +84,31 @@ button {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--sky) 30%, transparent);
+  background: color-mix(in srgb, var(--signal) 8%, transparent);
 }
 
 .lx-card {
   background: var(--surface);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow);
-  border: 1px solid transparent;
-  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
-}
-
-.dark .lx-card {
-  border-color: var(--border);
-  background: var(--surface-elevated);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  box-shadow: none;
+  transition: background-color 200ms ease, border-color 200ms ease;
 }
 
 .lx-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-hover);
-}
-
-.dark .lx-card:hover {
-  border-color: color-mix(in srgb, var(--sky) 55%, var(--border));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--sky) 40%, transparent);
+  background: var(--elevated);
 }
 
 .lx-pill {
-  border-radius: var(--radius-pill);
-}
-
-.lx-module-coral {
-  background: var(--coral-soft);
-}
-.lx-module-sky {
-  background: var(--sky-soft);
-}
-.lx-module-mint {
-  background: var(--mint-soft);
-}
-.lx-module-mustard {
-  background: var(--mustard-soft);
+  border-radius: 9999px;
 }
 
 .shimmer {
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--border) 70%, var(--bg-page)) 0%,
-    color-mix(in srgb, var(--surface) 88%, white) 45%,
-    color-mix(in srgb, var(--border) 70%, var(--bg-page)) 100%
+    color-mix(in srgb, var(--border) 70%, var(--canvas)) 0%,
+    var(--elevated) 45%,
+    color-mix(in srgb, var(--border) 70%, var(--canvas)) 100%
   );
   background-size: 220% 100%;
   animation: shimmer 2.8s ease-in-out infinite;
@@ -168,8 +124,9 @@ button {
 }
 
 .lx-focus:focus-visible {
-  outline: 2px solid var(--sky);
+  outline: 2px solid var(--signal);
   outline-offset: 2px;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 8%, transparent);
 }
 
 .lx-backdrop {

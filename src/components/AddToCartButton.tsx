@@ -70,11 +70,11 @@ export function AddToCartButton({
               type="button"
               disabled={v.stock < 1}
               onClick={() => setVariantId(v.id)}
-              className={`lx-pill px-3 py-1.5 text-sm border transition ${
+              className={`rounded px-3 py-1.5 text-sm border transition ${
                 variantId === v.id
-                  ? "border-[var(--sky)] bg-[var(--sky-soft)]"
-                  : "border-[var(--border)] hover:border-[var(--sky)]"
-              } disabled:opacity-40`}
+                  ? "border-[var(--signal)] bg-[var(--elevated)]"
+                  : "border-[var(--border)] hover:border-[var(--signal)]"
+              } disabled:border-[var(--disabled)] disabled:text-[var(--disabled)]`}
             >
               {v.name}
             </button>
@@ -82,14 +82,14 @@ export function AddToCartButton({
         </div>
       )}
       <div className="flex flex-wrap gap-2">
-        <Button onClick={add} disabled={disabled || loading} variant="coral" size="lg">
+        <Button onClick={add} disabled={disabled || loading} variant="primary" size="lg">
           {loading ? "Adding…" : "Add to cart"}
         </Button>
         <Button onClick={wishlist} disabled={loading} variant="secondary" size="lg">
           Wishlist
         </Button>
       </div>
-      {message && <p className="text-sm text-[var(--mint)]">{message}</p>}
+      {message && <p className="text-sm text-[var(--foreground)]">{message}</p>}
     </div>
   );
 }

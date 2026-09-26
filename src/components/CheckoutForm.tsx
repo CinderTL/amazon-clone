@@ -78,7 +78,7 @@ export function CheckoutForm({
     return (
       <div className="lx-card p-6">
         <p className="font-medium">Add a shipping address before checkout.</p>
-        <a href="/account/addresses" className="text-[var(--sky)] text-sm mt-2 inline-block">
+        <a href="/account/addresses" className="text-[var(--signal)] text-sm mt-2 inline-block">
           Manage addresses
         </a>
       </div>
@@ -92,14 +92,14 @@ export function CheckoutForm({
           {["Shipping", "Payment", "Review"].map((label, i) => (
             <li
               key={label}
-              className={`lx-pill px-3 py-1 ${step === i + 1 ? "bg-[var(--sky)] text-white" : "bg-[var(--bg-page)] text-[var(--text-muted)]"}`}
+              className={`rounded px-3 py-1 ${step === i + 1 ? "bg-[var(--signal)] text-[var(--canvas)]" : "bg-[var(--canvas)] text-[var(--muted)]"}`}
             >
               {i + 1}. {label}
             </li>
           ))}
         </ol>
 
-        {error && <p className="text-sm text-[var(--coral)]">{error}</p>}
+        {error && <p className="text-sm text-[var(--signal)]">{error}</p>}
 
         {step === 1 && (
           <div className="space-y-4">
@@ -113,7 +113,7 @@ export function CheckoutForm({
                 ))}
               </Select>
             </div>
-            <Button onClick={createIntent} disabled={loading || !addressId} variant="coral">
+            <Button onClick={createIntent} disabled={loading || !addressId} variant="primary">
               {loading ? "Preparing…" : "Continue to payment"}
             </Button>
           </div>
@@ -121,9 +121,9 @@ export function CheckoutForm({
 
         {step === 2 && (
           <div className="space-y-4">
-            <p className="text-sm text-[var(--text-muted)]">
+            <p className="text-sm text-[var(--muted)]">
               Stripe test mode{orderMeta?.stub ? " (local stub — no live Stripe keys configured)" : ""}. Use test card{" "}
-              <code className="text-[var(--text)]">4242 4242 4242 4242</code> when keys are live.
+              <code className="text-[var(--foreground)]">4242 4242 4242 4242</code> when keys are live.
             </p>
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="sm:col-span-2">
@@ -143,7 +143,7 @@ export function CheckoutForm({
               <Button variant="secondary" onClick={() => setStep(1)}>
                 Back
               </Button>
-              <Button variant="sky" onClick={() => setStep(3)}>
+              <Button variant="primary" onClick={() => setStep(3)}>
                 Review order
               </Button>
             </div>
@@ -166,7 +166,7 @@ export function CheckoutForm({
               <Button variant="secondary" onClick={() => setStep(2)}>
                 Back
               </Button>
-              <Button variant="coral" disabled={loading} onClick={confirmPay}>
+              <Button variant="primary" disabled={loading} onClick={confirmPay}>
                 {loading ? "Placing order…" : `Pay ${formatPrice(totals.total)}`}
               </Button>
             </div>

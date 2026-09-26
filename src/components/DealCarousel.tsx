@@ -38,7 +38,7 @@ export function DealCarousel({ deals }: { deals: DealSlide[] }) {
       : null;
 
   return (
-    <section className="w-full relative overflow-hidden bg-[var(--sky)] text-white">
+    <section className="w-full relative overflow-hidden bg-[var(--signal)] text-[var(--canvas)]">
       <div className="absolute inset-0 opacity-20">
         <ProductImage
           src={deal.imageUrl}
@@ -57,31 +57,31 @@ export function DealCarousel({ deals }: { deals: DealSlide[] }) {
           <h2 className="font-heading text-3xl md:text-5xl font-extrabold mt-3 leading-tight max-w-xl">
             {deal.name}
           </h2>
-          <p className="mt-3 text-sm md:text-base text-white/85 max-w-lg line-clamp-3">{deal.description}</p>
+          <p className="mt-3 text-sm md:text-base text-canvas/85 max-w-lg line-clamp-3">{deal.description}</p>
           <div className="mt-5 flex items-baseline gap-3">
             <span className="text-3xl md:text-4xl font-extrabold">{formatPrice(deal.price)}</span>
             {deal.compareAt && deal.compareAt > deal.price && (
-              <span className="text-lg line-through text-white/60">{formatPrice(deal.compareAt)}</span>
+              <span className="text-lg line-through text-canvas/60">{formatPrice(deal.compareAt)}</span>
             )}
             {discount != null && (
-              <span className="lx-pill bg-white text-[var(--coral)] text-xs font-bold px-2.5 py-1">-{discount}%</span>
+              <span className="rounded bg-[var(--canvas)] text-[var(--signal)] text-xs font-bold px-2.5 py-1">-{discount}%</span>
             )}
           </div>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href={`/product/${deal.slug}`}>
-              <Button size="lg" className="bg-white text-[var(--sky)] hover:bg-white/90">
+              <Button size="lg" className="bg-[var(--canvas)] text-[var(--signal)] hover:bg-canvas/90">
                 Shop this deal
               </Button>
             </Link>
             <Link href={`/category/${deal.categorySlug}`}>
-              <Button size="lg" variant="secondary" className="border-white/40 bg-white/10 text-white hover:bg-white/20">
+              <Button size="lg" variant="secondary" className="border-canvas/40 bg-canvas/10 text-[var(--canvas)] hover:bg-canvas/20">
                 More in {deal.categoryName}
               </Button>
             </Link>
           </div>
         </div>
 
-        <Link href={`/product/${deal.slug}`} className="relative mx-auto w-full max-w-md aspect-square rounded-[28px] overflow-hidden bg-white/15 border border-white/20 shadow-2xl">
+        <Link href={`/product/${deal.slug}`} className="relative mx-auto w-full max-w-md aspect-square overflow-hidden rounded-lg border border-canvas/20 bg-canvas/15">
           <ProductImage
             src={deal.imageUrl}
             alt={deal.name}
@@ -98,7 +98,7 @@ export function DealCarousel({ deals }: { deals: DealSlide[] }) {
             type="button"
             aria-label="Previous deal"
             onClick={() => setIndex((i) => (i - 1 + count) % count)}
-            className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-black/25 hover:bg-black/40 flex items-center justify-center backdrop-blur-sm"
+            className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-canvas/25 hover:bg-canvas/40 flex items-center justify-center backdrop-blur-sm"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
@@ -106,7 +106,7 @@ export function DealCarousel({ deals }: { deals: DealSlide[] }) {
             type="button"
             aria-label="Next deal"
             onClick={() => setIndex((i) => (i + 1) % count)}
-            className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-black/25 hover:bg-black/40 flex items-center justify-center backdrop-blur-sm"
+            className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-canvas/25 hover:bg-canvas/40 flex items-center justify-center backdrop-blur-sm"
           >
             <ChevronRight className="h-6 w-6" />
           </button>
@@ -117,7 +117,7 @@ export function DealCarousel({ deals }: { deals: DealSlide[] }) {
                 type="button"
                 aria-label={`Go to ${d.categoryName} deal`}
                 onClick={() => setIndex(i)}
-                className={`h-2 rounded-full transition-all ${i === index ? "w-8 bg-white" : "w-2 bg-white/45"}`}
+                className={`h-2 rounded-full transition-all ${i === index ? "w-8 bg-[var(--canvas)]" : "w-2 bg-canvas/45"}`}
               />
             ))}
           </div>

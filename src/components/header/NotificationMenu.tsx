@@ -18,13 +18,13 @@ export function NotificationMenu({
   return (
     <Popover
       label="Notifications"
-      triggerClassName="relative inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-[var(--bg-page)]"
+      triggerClassName="relative inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-[var(--canvas)]"
       panelClassName="w-[min(20rem,calc(100vw-1.5rem))] p-0"
       trigger={
         <>
           <Bell className="h-5 w-5" aria-hidden />
           {signedIn && activeCount > 0 && (
-            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[var(--coral)]" aria-hidden />
+            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[var(--signal)]" aria-hidden />
           )}
         </>
       }
@@ -32,14 +32,14 @@ export function NotificationMenu({
       <div>
           <p className="border-b border-[var(--border)] px-4 py-3 font-heading text-sm font-bold">Notifications</p>
           {!signedIn ? (
-            <div className="px-4 py-4 text-sm text-[var(--text-muted)]">
+            <div className="px-4 py-4 text-sm text-[var(--muted)]">
               <p>Sign in to see updates about your orders.</p>
-              <Link href="/login?next=/" className="mt-3 inline-flex font-semibold text-[var(--sky)]">
+              <Link href="/login?next=/" className="mt-3 inline-flex font-semibold text-[var(--signal)]">
                 Sign in
               </Link>
             </div>
           ) : notifications.length === 0 ? (
-            <p className="px-4 py-4 text-sm text-[var(--text-muted)]">
+            <p className="px-4 py-4 text-sm text-[var(--muted)]">
               You&apos;re all caught up. Order updates will show up here.
             </p>
           ) : (
@@ -49,12 +49,12 @@ export function NotificationMenu({
                   <Link
                     href={item.href}
                     className={cn(
-                      "lx-focus block px-4 py-3 hover:bg-[var(--bg-page)]",
-                      item.active && "bg-[var(--sky-soft)]"
+                      "lx-focus block px-4 py-3 hover:bg-[var(--canvas)]",
+                      item.active && "bg-[var(--elevated)]"
                     )}
                   >
                     <span className="block text-sm font-semibold">{item.title}</span>
-                    <span className="mt-0.5 block text-xs text-[var(--text-muted)]">{item.body}</span>
+                    <span className="mt-0.5 block text-xs text-[var(--muted)]">{item.body}</span>
                   </Link>
                 </li>
               ))}

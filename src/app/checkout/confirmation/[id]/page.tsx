@@ -18,10 +18,10 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ i
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
-      <div className="lx-card p-8 text-center lx-module-mint">
-        <p className="text-sm font-semibold text-[var(--mint)]">Order confirmed</p>
+      <div className="lx-card p-8 text-center bg-[var(--elevated)]">
+        <p className="text-sm font-semibold text-[var(--foreground)]">Order confirmed</p>
         <h1 className="font-heading text-3xl font-extrabold mt-2">{order.orderNumber}</h1>
-        <p className="text-[var(--text-muted)] mt-2">
+        <p className="text-[var(--muted)] mt-2">
           Placed {formatDate(order.createdAt)} · {formatPrice(order.total)}
         </p>
       </div>

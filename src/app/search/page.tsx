@@ -27,7 +27,7 @@ export default async function SearchPage({
       <h1 className="font-heading text-3xl font-extrabold">
         {params.q ? `Results for “${params.q}”` : "Search"}
       </h1>
-      <p className="text-sm text-[var(--text-muted)] mt-1 mb-6">{data.total} products</p>
+      <p className="text-sm text-[var(--muted)] mt-1 mb-6">{data.total} products</p>
       <div className="grid lg:grid-cols-[240px_1fr] gap-6">
         <ProductFilters />
         <ProductGrid products={data.items} />

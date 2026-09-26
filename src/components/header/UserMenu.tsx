@@ -22,9 +22,9 @@ function MenuLink({
       href={href}
       role="menuitem"
       tabIndex={-1}
-      className="lx-focus flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium hover:bg-[var(--bg-page)]"
+      className="lx-focus flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium hover:bg-[var(--canvas)]"
     >
-      <Icon className="h-4 w-4 text-[var(--sky)]" aria-hidden />
+      <Icon className="h-4 w-4 text-[var(--signal)]" aria-hidden />
       {label}
     </Link>
   );
@@ -39,7 +39,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
     <Popover
       label="Account menu"
       panelRole="menu"
-      triggerClassName="inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[var(--sky)] text-sm font-bold text-white"
+      triggerClassName="inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[var(--signal)] text-sm font-bold text-[var(--canvas)]"
       trigger={
         showPhoto ? (
           <LoadingImage
@@ -56,8 +56,8 @@ export function UserMenu({ user }: { user: HeaderUser }) {
       }
     >
       <div className="py-1">
-          <p className="px-3 py-2 text-xs text-[var(--text-muted)]">
-            <span className="block text-sm font-semibold text-[var(--text)]">{user.name}</span>
+          <p className="px-3 py-2 text-xs text-[var(--muted)]">
+            <span className="block text-sm font-semibold text-[var(--foreground)]">{user.name}</span>
             {user.email}
           </p>
           <MenuLink href="/account/profile" label="User Profile" icon={User} />
@@ -69,7 +69,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
             type="button"
             role="menuitem"
             tabIndex={-1}
-            className="lx-focus flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-[var(--coral)] hover:bg-[var(--bg-page)]"
+            className="lx-focus flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-[var(--signal)] hover:bg-[var(--canvas)]"
             onClick={async () => {
               await fetch("/api/auth/logout", { method: "POST" });
               router.push("/");

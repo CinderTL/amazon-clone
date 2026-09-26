@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 function Logo() {
   return (
     <Link href="/" className="lx-focus shrink-0 font-heading text-xl font-extrabold tracking-tight lg:text-2xl">
-      Lixa<span className="text-[var(--coral)]">zon</span>
+      Lixa<span className="text-[var(--signal)]">zon</span>
     </Link>
   );
 }
@@ -21,17 +21,17 @@ function Logo() {
 function SearchForm({ className }: { className?: string }) {
   return (
     <form action="/search" method="get" className={cn("min-w-0", className)} role="search">
-      <div className="flex w-full items-center overflow-hidden rounded-full border border-[var(--border)] bg-[var(--surface)] focus-within:ring-2 focus-within:ring-[var(--ring)]">
+      <div className="flex w-full items-center overflow-hidden rounded border border-[var(--border)] bg-[var(--surface)] focus-within:border-[var(--signal)] focus-within:ring-2 focus-within:ring-[var(--ring)]">
         <input
           type="search"
           name="q"
           placeholder="Search products, brands, categories…"
-          className="h-11 min-w-0 flex-1 bg-transparent px-4 text-[var(--text)] outline-none"
+          className="h-11 min-w-0 flex-1 bg-transparent px-4 text-[var(--foreground)] outline-none"
           aria-label="Search"
         />
         <button
           type="submit"
-          className="lx-focus inline-flex h-11 w-12 items-center justify-center text-[var(--sky)] hover:bg-[var(--sky-soft)]"
+          className="lx-focus inline-flex h-11 w-12 items-center justify-center text-[var(--signal)] hover:bg-[var(--elevated)]"
           aria-label="Search"
         >
           <Search className="h-5 w-5" aria-hidden />
@@ -45,12 +45,12 @@ function CartLink({ count }: { count: number }) {
   return (
     <Link
       href="/cart"
-      className="lx-focus relative inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-[var(--bg-page)]"
+      className="lx-focus relative inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-[var(--canvas)]"
       aria-label={count > 0 ? `Cart, ${count} items` : "Cart"}
     >
       <ShoppingCart className="h-5 w-5" aria-hidden />
       {count > 0 && (
-        <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--coral)] px-1 text-[10px] font-bold text-white">
+        <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--signal)] px-1 text-[10px] font-bold text-[var(--canvas)]">
           {count}
         </span>
       )}
@@ -63,7 +63,7 @@ function BecomeSellerLink({ href, className }: { href: string; className?: strin
     <Link
       href={href}
       className={cn(
-        "lx-focus inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold text-[var(--sky)] hover:bg-[var(--sky-soft)]",
+        "lx-focus inline-flex items-center justify-center gap-1.5 rounded px-3 py-2 text-sm font-semibold text-[var(--signal)] hover:bg-[var(--elevated)]",
         className
       )}
     >
@@ -86,7 +86,7 @@ function CategoriesButton({
     <button
       type="button"
       className={cn(
-        "lx-focus inline-flex items-center gap-2 rounded-full px-2 py-2 text-sm font-semibold hover:bg-[var(--bg-page)] sm:px-3",
+        "lx-focus inline-flex items-center gap-2 rounded px-2 py-2 text-sm font-semibold hover:bg-[var(--canvas)] sm:px-3",
         className
       )}
       aria-expanded={expanded}
@@ -104,7 +104,7 @@ function AccountSlot({ user }: { user: HeaderUser | null }) {
     return (
       <Link
         href="/login"
-        className="lx-focus inline-flex h-10 items-center rounded-full bg-[var(--sky)] px-3 text-sm font-semibold text-white hover:opacity-90"
+        className="lx-focus inline-flex h-10 items-center rounded bg-[var(--signal)] px-3 text-sm font-semibold text-[var(--canvas)] hover:opacity-90"
       >
         Sign In
       </Link>
@@ -142,7 +142,7 @@ export function HeaderBar({
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--bg)]/95 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--canvas)]/95 backdrop-blur-md">
       <div className="hidden h-16 items-center gap-4 px-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:px-8">
         <div className="justify-self-start">
           <CategoriesButton expanded={categoriesOpen} onOpen={openCategories} />

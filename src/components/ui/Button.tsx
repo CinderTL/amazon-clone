@@ -1,19 +1,18 @@
 import { cn } from "@/lib/utils";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "ghost" | "coral" | "sky" | "mint" | "mustard" | "danger";
+  variant?: "primary" | "secondary" | "ghost" | "danger";
   size?: "sm" | "md" | "lg" | "icon";
 };
 
 const variantClass: Record<NonNullable<ButtonProps["variant"]>, string> = {
-  primary: "bg-[var(--sky)] text-white hover:opacity-90",
-  secondary: "bg-[var(--surface-elevated)] text-[var(--text)] border border-[var(--border)] hover:border-[var(--sky)]",
-  ghost: "bg-transparent text-[var(--text)] hover:bg-[var(--bg-page)]",
-  coral: "bg-[var(--coral)] text-white hover:opacity-90",
-  sky: "bg-[var(--sky)] text-white hover:opacity-90",
-  mint: "bg-[var(--mint)] text-white hover:opacity-90",
-  mustard: "bg-[var(--mustard)] text-[var(--text)] hover:opacity-90",
-  danger: "bg-[var(--coral)] text-white hover:opacity-90",
+  primary:
+    "bg-[var(--signal)] text-[var(--canvas)] hover:opacity-90 disabled:bg-[var(--disabled)] disabled:text-[var(--canvas)]",
+  secondary:
+    "bg-[var(--elevated)] text-[var(--foreground)] border border-[var(--border)] hover:border-[var(--signal)] disabled:bg-[var(--disabled)] disabled:text-[var(--muted)] disabled:border-[var(--disabled)]",
+  ghost: "bg-transparent text-[var(--foreground)] hover:bg-[var(--elevated)] disabled:text-[var(--disabled)]",
+  danger:
+    "bg-[var(--signal)] text-[var(--canvas)] hover:opacity-90 disabled:bg-[var(--disabled)] disabled:text-[var(--canvas)]",
 };
 
 const sizeClass: Record<NonNullable<ButtonProps["size"]>, string> = {
@@ -34,7 +33,7 @@ export function Button({
     <button
       type={type}
       className={cn(
-        "lx-focus inline-flex items-center justify-center gap-2 font-medium lx-pill transition-all duration-200 disabled:pointer-events-none disabled:opacity-50",
+        "lx-focus inline-flex items-center justify-center gap-2 rounded font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-100",
         variantClass[variant],
         sizeClass[size],
         className

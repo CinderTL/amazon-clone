@@ -37,7 +37,7 @@ export function ReviewForm({ productId }: { productId: string }) {
   return (
     <form onSubmit={onSubmit} className="lx-card p-4 space-y-3">
       <h3 className="font-heading font-bold">Write a review</h3>
-      {error && <p className="text-sm text-[var(--coral)]">{error}</p>}
+      {error && <p className="text-sm text-[var(--signal)]">{error}</p>}
       <div>
         <Label htmlFor="rating">Rating</Label>
         <Input id="rating" name="rating" type="number" min={1} max={5} defaultValue={5} required />

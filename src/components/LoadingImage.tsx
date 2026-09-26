@@ -23,7 +23,7 @@ function ImageFallback({ alt, children }: { alt: string; children?: React.ReactN
   if (children) return <>{children}</>;
   return (
     <div
-      className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[var(--bg-page)] text-[var(--text-muted)]"
+      className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[var(--canvas)] text-[var(--muted)]"
       role="img"
       aria-label={alt || "Image unavailable"}
     >
@@ -49,7 +49,7 @@ function LoadingImageInner({
   const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
 
   return (
-    <div className={cn("relative overflow-hidden bg-[var(--bg-page)]", className)}>
+    <div className={cn("relative overflow-hidden bg-[var(--canvas)]", className)}>
       {status === "loading" && <div className="shimmer absolute inset-0 z-[1]" aria-hidden />}
       {status === "error" ? (
         <ImageFallback alt={alt}>{fallback}</ImageFallback>
@@ -79,7 +79,7 @@ export function LoadingImage(props: LoadingImageProps) {
   const trimmed = props.src?.trim();
   if (!trimmed) {
     return (
-      <div className={cn("relative overflow-hidden bg-[var(--bg-page)]", props.className)}>
+      <div className={cn("relative overflow-hidden bg-[var(--canvas)]", props.className)}>
         <ImageFallback alt={props.alt}>{props.fallback}</ImageFallback>
       </div>
     );

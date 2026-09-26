@@ -81,7 +81,7 @@ export function Dialog({ open, onClose, title, description, children, className 
     <div className="fixed inset-0 z-[90] flex items-end justify-center p-3 sm:items-center sm:p-6">
       <button
         type="button"
-        className="lx-backdrop absolute inset-0 bg-black/45"
+        className="lx-backdrop absolute inset-0 bg-[color-mix(in_srgb,#050505_45%,transparent)]"
         aria-label="Close dialog"
         onClick={onClose}
       />
@@ -93,7 +93,7 @@ export function Dialog({ open, onClose, title, description, children, className 
         aria-describedby={description ? descId : undefined}
         tabIndex={-1}
         className={cn(
-          "lx-dialog relative z-[1] w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 text-[var(--text)] shadow-[var(--shadow)] outline-none sm:p-6",
+          "lx-dialog relative z-[1] w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 text-[var(--foreground)]  outline-none sm:p-6",
           className
         )}
       >
@@ -103,7 +103,7 @@ export function Dialog({ open, onClose, title, description, children, className 
               {title}
             </h2>
             {description && (
-              <p id={descId} className="mt-1 text-sm text-[var(--text-muted)]">
+              <p id={descId} className="mt-1 text-sm text-[var(--muted)]">
                 {description}
               </p>
             )}
@@ -112,7 +112,7 @@ export function Dialog({ open, onClose, title, description, children, className 
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="lx-focus inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-[var(--bg-page)]"
+            className="lx-focus inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-[var(--canvas)]"
           >
             <X className="h-4 w-4" aria-hidden />
           </button>

@@ -18,9 +18,9 @@ export function SubcategoryCard({
     <Link
       href={`/category/${slug}`}
       onClick={onNavigate}
-      className="lx-focus group block rounded-2xl"
+      className="lx-focus group block rounded-lg"
     >
-      <div className="relative aspect-square overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-page)] shadow-[var(--shadow)] transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[var(--shadow-hover)]">
+      <div className="relative aspect-square overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--canvas)] transition duration-200 hover:bg-[var(--elevated)]">
         <LoadingImage
           src={imageUrl}
           alt=""
@@ -29,7 +29,7 @@ export function SubcategoryCard({
           fit="cover"
         />
       </div>
-      <p className="mt-2 text-center text-sm font-semibold text-[var(--text)] group-hover:text-[var(--sky)]">
+      <p className="mt-2 text-center text-sm font-semibold text-[var(--foreground)] group-hover:text-[var(--signal)]">
         {name}
       </p>
     </Link>

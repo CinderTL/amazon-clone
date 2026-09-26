@@ -80,15 +80,15 @@ export function Footer() {
       <div className="grid w-full gap-8 px-4 py-10 sm:grid-cols-3 md:px-8 lg:px-12">
         <div>
           <p className="font-heading text-xl font-extrabold">
-            Lixa<span className="text-[var(--coral)]">zon</span>
+            Lixa<span className="text-[var(--signal)]">zon</span>
           </p>
-          <p className="mt-2 max-w-sm text-sm text-[var(--text-muted)]">
+          <p className="mt-2 max-w-sm text-sm text-[var(--muted)]">
             A simple, colorful marketplace for buyers and sellers—focused workflows without the clutter.
           </p>
         </div>
         <div>
           <p className="mb-2 font-semibold">Shop</p>
-          <ul className="space-y-1 text-sm text-[var(--text-muted)]">
+          <ul className="space-y-1 text-sm text-[var(--muted)]">
             <li>
               <Link href="/search" className="lx-focus rounded-sm">
                 Search
@@ -108,7 +108,7 @@ export function Footer() {
         </div>
         <div>
           <p className="mb-2 font-semibold">Sell</p>
-          <ul className="space-y-1 text-sm text-[var(--text-muted)]">
+          <ul className="space-y-1 text-sm text-[var(--muted)]">
             <li>
               <Link href="/become-seller" className="lx-focus rounded-sm">
                 Become a seller
@@ -122,7 +122,7 @@ export function Footer() {
           </ul>
         </div>
       </div>
-      <div className="border-t border-[var(--border)] py-4 text-center text-xs text-[var(--text-muted)]">
+      <div className="border-t border-[var(--border)] py-4 text-center text-xs text-[var(--muted)]">
         © {new Date().getFullYear()} Lixazon. Demo marketplace.
       </div>
     </footer>

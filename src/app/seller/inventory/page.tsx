@@ -15,7 +15,7 @@ export default async function InventoryPage() {
 
   return (
     <SellerShell current="/seller/inventory" title="Inventory">
-      <p className="text-sm text-[var(--text-muted)] mb-3">Update stock levels — changes save when you leave the field.</p>
+      <p className="text-sm text-[var(--muted)] mb-3">Update stock levels — changes save when you leave the field.</p>
       <InventoryEditor products={products} />
     </SellerShell>
   );

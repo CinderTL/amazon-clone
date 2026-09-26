@@ -96,7 +96,7 @@ export function Popover({
           aria-label={label}
           onClick={closeFromSelection}
           className={cn(
-            "lx-pop absolute top-[calc(100%+0.5rem)] z-[70] min-w-56 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-1.5 text-[var(--text)] shadow-[var(--shadow)]",
+            "lx-pop absolute top-[calc(100%+0.5rem)] z-[70] min-w-56 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-1.5 text-[var(--foreground)] ",
             align === "end" ? "right-0" : "left-0",
             panelClassName
           )}

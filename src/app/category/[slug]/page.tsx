@@ -30,21 +30,12 @@ export default async function CategoryPage({
     sort: sp.sort || "newest",
   });
 
-  const accentClass =
-    category.accent === "sky"
-      ? "lx-module-sky"
-      : category.accent === "mint"
-        ? "lx-module-mint"
-        : category.accent === "mustard"
-          ? "lx-module-mustard"
-          : "lx-module-coral";
-
   return (
     <div className="w-full">
-      <section className={`${accentClass} py-10 w-full`}>
+      <section className="w-full border-b border-[var(--border)] bg-[var(--surface)] py-10">
         <div className="w-full px-4 md:px-8 lg:px-12">
           <h1 className="font-heading text-4xl font-extrabold">{category.name}</h1>
-          {category.description && <p className="mt-2 text-[var(--text-muted)] max-w-xl">{category.description}</p>}
+          {category.description && <p className="mt-2 text-[var(--muted)] max-w-xl">{category.description}</p>}
         </div>
       </section>
       <div className="w-full px-4 md:px-8 lg:px-12 py-8 grid lg:grid-cols-[240px_1fr] gap-6">
