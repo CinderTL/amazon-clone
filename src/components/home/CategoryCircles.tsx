@@ -51,7 +51,7 @@ export function CategoryCircles({ categories }: { categories: CircleCategory[] }
                   className="lx-focus group flex w-20 flex-col items-center gap-2 rounded-lg text-center"
                   onFocus={(event) => event.currentTarget.scrollIntoView({ inline: "nearest", block: "nearest" })}
                 >
-                  <span className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#050505] bg-[#fcfcfc] text-[var(--signal)] transition-colors group-hover:border-[var(--signal)] group-focus-visible:border-[var(--signal)]">
+                  <span className="flex h-16 w-16 items-center justify-center rounded-full border border-[#050505] bg-[#fcfcfc] text-[var(--signal)] transition-colors group-hover:border-[var(--signal)] group-focus-visible:border-[var(--signal)]">
                     <Icon className="h-6 w-6" aria-hidden />
                   </span>
                   <span className="line-clamp-3 text-xs font-medium leading-4 text-[var(--foreground)]">
