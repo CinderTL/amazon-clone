@@ -35,11 +35,13 @@ export async function POST(request: Request) {
     const extension = imageExtension(buffer);
     if (!extension) throw new ApiError("Upload a JPEG, PNG, WebP, or GIF image");
 
+    const scope: UploadScope = form.get("scope") === "store" ? "stores" : "products";
     const filename = `${randomBytes(16).toString("hex")}.${extension}`;
-    const directory = uploadsDirectory();
+    const directory = uploadsDirectory(scope);
     await fs.mkdir(directory, { recursive: true });
     await fs.writeFile(path.join(directory, filename), buffer);
-    return jsonOk({ url: `/uploads/products/${filename}` }, 201);
+    const folder = scope === "stores" ? "stores" : "products";
+    return jsonOk({ url: `/uploads/${folder}/${filename}` }, 201);
   } catch (error) {
     return handleApiError(error);
   }

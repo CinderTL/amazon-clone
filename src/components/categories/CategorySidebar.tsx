@@ -1,39 +1,9 @@
 "use client";
 
-import {
-  Baby,
-  Car,
-  Check,
-  Dumbbell,
-  Gem,
-  Headphones,
-  HeartPulse,
-  Home,
-  Shirt,
-  ShoppingBasket,
-  Smartphone,
-  Tv,
-  Watch,
-  type LucideIcon,
-} from "lucide-react";
+import { Check } from "lucide-react";
+import { categoryIcon } from "@/components/categories/category-icons";
 import { cn } from "@/lib/utils";
 import type { HeaderCategory } from "@/components/header/types";
-
-const ICONS: Record<string, LucideIcon> = {
-  "electronic-accessories": Headphones,
-  "tv-home-appliances": Tv,
-  "health-beauty": HeartPulse,
-  "mother-baby": Baby,
-  "electronic-devices": Smartphone,
-  "groceries-pets": ShoppingBasket,
-  "home-lifestyle": Home,
-  "womens-fashion": Shirt,
-  "mens-fashion": Shirt,
-  "kids-fashion": Baby,
-  "watches-bags-jewellery": Watch,
-  "sports-outdoor": Dumbbell,
-  "automotive-motorbike": Car,
-};
 
 export function CategorySidebar({
   categories,
@@ -48,10 +18,10 @@ export function CategorySidebar({
 }) {
   return (
     <nav aria-label="Major categories" className={cn("border-[var(--border)] bg-[var(--surface)]", className)}>
-      <ul className="flex flex-col p-2 md:p-3">
+      <ul className="flex flex-col gap-1 p-2 md:p-3">
         {categories.map((category) => {
           const active = category.slug === selectedSlug;
-          const Icon = ICONS[category.slug] ?? Gem;
+          const Icon = categoryIcon(category.slug);
           return (
             <li key={category.id}>
               <button
@@ -59,7 +29,7 @@ export function CategorySidebar({
                 aria-pressed={active}
                 onClick={() => onSelect(category.slug)}
                 className={cn(
-                  "lx-focus flex w-full items-center gap-3 rounded-xl border-l-4 px-3 py-2.5 text-left text-sm transition-colors",
+                  "lx-focus flex min-h-[3.25rem] w-full items-center gap-3 rounded-xl border-l-4 px-3 py-2.5 text-left text-sm transition-colors",
                   active
                     ? "border-[var(--signal)] bg-[var(--elevated)] font-semibold text-[var(--foreground)]"
                     : "border-transparent text-[var(--muted)] hover:bg-[var(--canvas)] hover:text-[var(--foreground)]"

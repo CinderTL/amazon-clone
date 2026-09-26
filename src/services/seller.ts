@@ -1,7 +1,7 @@
 import { ApiError } from "@/lib/api";
 import { prisma } from "@/lib/db";
 import { slugify } from "@/lib/utils";
-import { assertStoredUploads } from "@/lib/uploads";
+import { assertProductImages } from "@/lib/uploads";
 import { OrderStatus, ProductStatus, ShippingScope } from "@/generated/prisma/client";
 
 export type SellerProductInput = {
@@ -53,7 +53,7 @@ async function productWriteData(sellerId: string, input: SellerProductInput) {
     if (!input.price || input.price <= 0) throw new ApiError("Add a price greater than 0 before publishing");
     if (input.stock == null || input.stock < 0) throw new ApiError("Add a stock quantity before publishing");
     if (!input.categoryId) throw new ApiError("Choose a category before publishing");
-    if (!images.length) throw new ApiError("Upload at least one product image before publishing");
+    if (!images.length) throw new ApiError("Add at least one product image before publishing");
     if (input.compareAt != null && input.compareAt <= input.price) {
       throw new ApiError("Compare-at price must be higher than the selling price");
     }
@@ -62,10 +62,10 @@ async function productWriteData(sellerId: string, input: SellerProductInput) {
     }
   }
 
-  if (images.length) await assertStoredUploads(images);
+  if (images.length) await assertProductImages(images);
   if (input.categoryId) {
-    const category = await prisma.category.findUnique({ where: { id: input.categoryId } });
-    if (!category) throw new ApiError("Choose a valid category");
+    const category = await prisma.category.findFirst({ where: { id: input.categoryId, sellerId } });
+    if (!category) throw new ApiError("Choose a category you created for this store");
   }
 
   return {

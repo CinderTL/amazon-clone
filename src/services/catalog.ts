@@ -124,15 +124,15 @@ export async function getProductBySlug(slug: string) {
 
 export async function listCategories() {
   return prisma.category.findMany({
-    where: { parentId: null },
-    include: { children: { orderBy: { sortOrder: "asc" } } },
+    where: { parentId: null, sellerId: null },
+    include: { children: { where: { sellerId: null }, orderBy: { sortOrder: "asc" } } },
     orderBy: { sortOrder: "asc" },
   });
 }
 
 export async function listCategoryOptions() {
   const categories = await prisma.category.findMany({
-    where: { children: { none: {} } },
+    where: { children: { none: {} }, sellerId: null },
     include: { parent: { select: { name: true, sortOrder: true } } },
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
   });

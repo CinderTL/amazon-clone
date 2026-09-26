@@ -71,9 +71,11 @@ h4,
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 input,
@@ -189,6 +191,23 @@ textarea:disabled,
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+.lx-scroll-x {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 1023px) {
+  .lx-scroll-x {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .lx-scroll-x::-webkit-scrollbar {
+    display: none;
   }
 }
 

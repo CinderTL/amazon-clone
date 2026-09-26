@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getProductBySlug } from "@/services/catalog";
-import { isPlaceholderImageUrl, parseImages } from "@/lib/utils";
+import { parseImages } from "@/lib/utils";
 import { StarRating } from "@/components/ui/StarRating";
 import { ProductImage } from "@/components/ProductImage";
 import { ProductGrid } from "@/components/ProductCard";
@@ -20,8 +20,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const product = await getProductBySlug(slug);
   if (!product || !product.active || product.status !== "PUBLISHED") notFound();
 
-  const images = parseImages(product.images).filter((src) => !isPlaceholderImageUrl(src));
-  const cover = product.imageUrl && !isPlaceholderImageUrl(product.imageUrl) ? product.imageUrl : null;
+  const images = parseImages(product.images).map((src) => src.trim()).filter(Boolean);
+  const cover = product.imageUrl?.trim() || null;
   const gallery = images.length ? images : cover ? [cover] : [];
   const related = product.categoryId
     ? await prisma.product.findMany({
@@ -68,7 +68,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <div>
           <p className="text-sm text-[var(--muted)]">
             {product.category && (
-              <Link href={`/category/${product.category.slug}`} className="text-[var(--signal)]">
+              <Link
+                href={
+                  product.category.sellerId
+                    ? `/store/${product.seller.slug}?category=${product.category.slug}`
+                    : `/category/${product.category.slug}`
+                }
+                className="text-[var(--signal)]"
+              >
                 {product.category.name}
               </Link>
             )}
@@ -92,7 +99,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <p className={`mt-3 text-sm font-medium ${product.stock > 0 ? "text-[var(--foreground)]" : "text-[var(--signal)]"}`}>
             {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
           </p>
-          <p className="mt-1 text-sm text-[var(--muted)]">Sold by {product.seller.storeName}</p>
+          <p className="mt-1 text-sm text-[var(--muted)]">
+            Sold by{" "}
+            <Link href={`/store/${product.seller.slug}`} className="font-semibold text-[var(--signal)]">
+              {product.seller.storeName}
+            </Link>
+          </p>
           <p className="mt-1 text-sm text-[var(--muted)]">{shipping}</p>
           <div className="mt-6">
             <AddToCartButton

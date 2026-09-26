@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { Input, Label, Textarea, Select } from "@/components/ui/Form";
+import { Input, Label, Select } from "@/components/ui/Form";
 import { Price } from "@/components/CurrencyProvider";
 import { ProductImage } from "@/components/ProductImage";
 import { ConfirmDialog } from "@/components/ui/Dialog";
@@ -199,52 +199,3 @@ export function SellerOrdersList({
   );
 }
 
-export function StoreProfileForm({
-  store,
-}: {
-  store: { storeName: string; slug: string; description: string | null; logoUrl: string | null; bannerUrl: string | null };
-}) {
-  const router = useRouter();
-  const [message, setMessage] = useState("");
-
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const res = await fetch("/api/seller/store", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        storeName: form.get("storeName"),
-        description: form.get("description") || null,
-        logoUrl: form.get("logoUrl") || null,
-        bannerUrl: form.get("bannerUrl") || null,
-      }),
-    });
-    setMessage(res.ok ? "Saved" : "Failed");
-    router.refresh();
-  }
-
-  return (
-    <form onSubmit={onSubmit} className="lx-card p-5 space-y-3 max-w-xl">
-      <div>
-        <Label>Store name</Label>
-        <Input name="storeName" defaultValue={store.storeName} required />
-        <p className="text-sm text-[var(--muted)] mt-1">/store/{store.slug}</p>
-      </div>
-      <div>
-        <Label>Description</Label>
-        <Textarea name="description" defaultValue={store.description || ""} />
-      </div>
-      <div>
-        <Label>Logo URL</Label>
-        <Input name="logoUrl" defaultValue={store.logoUrl || ""} />
-      </div>
-      <div>
-        <Label>Banner URL</Label>
-        <Input name="bannerUrl" defaultValue={store.bannerUrl || ""} />
-      </div>
-      {message && <p className="text-sm text-[var(--foreground)]">{message}</p>}
-      <Button type="submit">Save store</Button>
-    </form>
-  );
-}

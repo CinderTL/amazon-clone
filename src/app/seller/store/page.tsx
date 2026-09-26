@@ -1,6 +1,6 @@
 import { requireSeller } from "@/lib/auth";
 import { SellerShell } from "@/components/SellerNav";
-import { StoreProfileForm } from "@/components/SellerForms";
+import { StoreProfileForm } from "@/components/seller/StoreProfileForm";
 
 export const metadata = { title: "Store Profile" };
 

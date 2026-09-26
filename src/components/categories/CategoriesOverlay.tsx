@@ -116,7 +116,7 @@ export function CategoriesOverlay({
           categories={categories}
           selectedSlug={selected?.slug ?? ""}
           onSelect={setSelectedSlug}
-          className="max-h-[38vh] w-full shrink-0 overflow-y-auto border-b md:h-full md:max-h-none md:w-[30vw] md:min-w-[220px] md:max-w-[380px] md:border-b-0 md:border-r"
+          className="max-h-[38vh] w-full shrink-0 overflow-y-auto border-b md:h-full md:max-h-none md:w-[24vw] md:min-w-[176px] md:max-w-[304px] md:border-b-0 md:border-r"
         />
         <SubcategoryGrid
           category={selected}

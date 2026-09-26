@@ -36,21 +36,6 @@ export function slugify(text: string) {
     .replace(/(^-|-$)/g, "");
 }
 
-const PLACEHOLDER_IMAGE_HOSTS = new Set([
-  "images.unsplash.com",
-  "picsum.photos",
-  "fastly.picsum.photos",
-  "placehold.co",
-]);
-
-export function isPlaceholderImageUrl(src: string) {
-  try {
-    return PLACEHOLDER_IMAGE_HOSTS.has(new URL(src).hostname);
-  } catch {
-    return false;
-  }
-}
-
 export function parseImages(images: string | string[]): string[] {
   if (Array.isArray(images)) return images;
   try {

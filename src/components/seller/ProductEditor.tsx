@@ -3,11 +3,11 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, ImagePlus, Star, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, ImagePlus, Link2, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Select, Textarea } from "@/components/ui/Form";
 import { ProductImage } from "@/components/ProductImage";
-import { isUploadPath } from "@/lib/upload-path";
+import { isProductImageSource, isRemoteImageUrl } from "@/lib/upload-path";
 
 type CategoryOption = { id: string; name: string };
 
@@ -33,7 +33,7 @@ const ACCEPT = "image/jpeg,image/png,image/webp,image/gif";
 
 function storedImages(product?: ProductDraft) {
   const source = product?.images?.length ? product.images : product?.imageUrl ? [product.imageUrl] : [];
-  return source.filter(isUploadPath);
+  return source.filter(isProductImageSource);
 }
 
 export function ProductEditor({
@@ -49,6 +49,7 @@ export function ProductEditor({
   const formRef = useRef<HTMLFormElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<string[]>(() => storedImages(product));
+  const [imageLink, setImageLink] = useState("");
   const [shippingScope, setShippingScope] = useState<"INTERNATIONAL" | "NATIONAL">(product?.shippingScope ?? "INTERNATIONAL");
   const [country, setCountry] = useState(originCountry);
   const [error, setError] = useState("");
@@ -89,6 +90,25 @@ export function ProductEditor({
     setImages((current) => [...current, ...added].slice(0, MAX_IMAGES));
     setUploading(false);
     if (fileRef.current) fileRef.current.value = "";
+  }
+
+  function addImageLink() {
+    const next = imageLink.trim();
+    setError("");
+    if (images.length >= MAX_IMAGES) {
+      setError(`You can add up to ${MAX_IMAGES} images`);
+      return;
+    }
+    if (!isRemoteImageUrl(next)) {
+      setError("Enter an image link that starts with http:// or https://");
+      return;
+    }
+    if (images.includes(next)) {
+      setError("That image is already in the list");
+      return;
+    }
+    setImages((current) => [...current, next]);
+    setImageLink("");
   }
 
   function move(index: number, direction: -1 | 1) {
@@ -171,7 +191,7 @@ export function ProductEditor({
       if (payload.description.trim().length < 10) return setError("Add a description of at least 10 characters before publishing");
       if (!payload.price || payload.price <= 0) return setError("Add a price greater than 0 before publishing");
       if (!payload.categoryId) return setError("Choose a category before publishing");
-      if (!images.length) return setError("Upload at least one image before publishing");
+      if (!images.length) return setError("Add at least one image before publishing");
       if (shippingScope === "NATIONAL" && !country) return setError("Enable your shipping location before publishing a national product");
     }
 
@@ -242,7 +262,13 @@ export function ProductEditor({
                   ))}
                 </Select>
                 {categories.length === 0 && (
-                  <p className="mt-1 text-xs text-[var(--muted)]">No categories are available yet.</p>
+                  <p className="mt-1 text-xs text-[var(--muted)]">
+                    No store categories yet.{" "}
+                    <Link href="/seller/categories" className="text-[var(--signal)]">
+                      Create one
+                    </Link>{" "}
+                    before you publish.
+                  </p>
                 )}
               </div>
               <div>
@@ -272,10 +298,30 @@ export function ProductEditor({
               className="sr-only"
               onChange={(event) => uploadFiles(event.target.files)}
             />
-            <p className="text-xs text-[var(--muted)]">JPEG, PNG, WebP, or GIF. Up to 8 images, 5 MB each. The first image is the primary photo.</p>
+            <div className="flex gap-2">
+              <Input
+                value={imageLink}
+                placeholder="https://example.com/image.jpg"
+                aria-label="Image link"
+                onChange={(event) => setImageLink(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    addImageLink();
+                  }
+                }}
+              />
+              <Button type="button" variant="secondary" disabled={uploading || images.length >= MAX_IMAGES} onClick={addImageLink}>
+                <Link2 className="h-4 w-4" aria-hidden />
+                Add link
+              </Button>
+            </div>
+            <p className="text-xs text-[var(--muted)]">
+              Upload a file or add an image link. Up to 8 images, 5 MB each for files. The first image is the primary photo. Use the arrows to change the order.
+            </p>
             {images.length === 0 ? (
               <div className="rounded border border-dashed border-[var(--border)] px-4 py-10 text-center text-sm text-[var(--muted)]">
-                No images yet. Upload photos before you publish.
+                No images yet. Upload a photo or add a link before you publish.
               </div>
             ) : (
               <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -289,7 +335,8 @@ export function ProductEditor({
                         </span>
                       )}
                     </div>
-                    <div className="mt-2 flex items-center justify-between gap-1">
+                    <p className="mt-2 text-[11px] font-semibold text-[var(--muted)]">Order {index + 1}</p>
+                    <div className="mt-1 flex items-center justify-between gap-1">
                       <div className="flex gap-1">
                         <button type="button" className="lx-focus rounded p-1 hover:bg-[var(--elevated)] disabled:cursor-not-allowed disabled:opacity-40" aria-label="Move image earlier" disabled={index === 0} onClick={() => move(index, -1)}>
                           <ArrowLeft className="h-4 w-4" />

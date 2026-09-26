@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { ImageOff } from "lucide-react";
-import { cn, isPlaceholderImageUrl } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 type LoadingImageProps = {
   src?: string | null;
@@ -33,6 +33,10 @@ function ImageFallback({ alt, children }: { alt: string; children?: React.ReactN
   );
 }
 
+function isRemoteImage(src: string) {
+  return src.startsWith("http://") || src.startsWith("https://");
+}
+
 function LoadingImageInner({
   src,
   alt,
@@ -47,6 +51,12 @@ function LoadingImageInner({
   fallback,
 }: LoadingImageProps & { src: string }) {
   const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
+  const remote = isRemoteImage(src);
+  const frameClass = cn(
+    fit === "contain" ? "object-contain" : "object-cover",
+    status === "loaded" ? "opacity-100" : "opacity-0",
+    imageClassName
+  );
 
   return (
     <div className={cn("relative overflow-hidden bg-[var(--canvas)]", className)}>
@@ -54,22 +64,30 @@ function LoadingImageInner({
       {status === "error" ? (
         <ImageFallback alt={alt}>{fallback}</ImageFallback>
       ) : (
-        <Image
-          src={src}
-          alt={alt}
-          fill={fill}
-          width={fill ? undefined : width}
-          height={fill ? undefined : height}
-          priority={priority}
-          sizes={sizes}
-          className={cn(
-            fit === "contain" ? "object-contain" : "object-cover",
-            status === "loaded" ? "opacity-100" : "opacity-0",
-            imageClassName
-          )}
-          onLoad={() => setStatus("loaded")}
-          onError={() => setStatus("error")}
-        />
+        remote ? (
+          // Seller image links can point at any host, which next/image will not load.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={src}
+            alt={alt}
+            className={cn("absolute inset-0 h-full w-full", frameClass)}
+            onLoad={() => setStatus("loaded")}
+            onError={() => setStatus("error")}
+          />
+        ) : (
+          <Image
+            src={src}
+            alt={alt}
+            fill={fill}
+            width={fill ? undefined : width}
+            height={fill ? undefined : height}
+            priority={priority}
+            sizes={sizes}
+            className={frameClass}
+            onLoad={() => setStatus("loaded")}
+            onError={() => setStatus("error")}
+          />
+        )
       )}
     </div>
   );
@@ -77,7 +95,7 @@ function LoadingImageInner({
 
 export function LoadingImage(props: LoadingImageProps) {
   const trimmed = props.src?.trim();
-  if (!trimmed || isPlaceholderImageUrl(trimmed)) {
+  if (!trimmed) {
     return (
       <div className={cn("relative overflow-hidden bg-[var(--canvas)]", props.className)}>
         <ImageFallback alt={props.alt}>{props.fallback}</ImageFallback>

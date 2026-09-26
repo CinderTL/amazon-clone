@@ -1,16 +1,24 @@
 import Link from "next/link";
-import type { Product, Category, SellerProfile } from "@/generated/prisma/client";
+import { cn } from "@/lib/utils";
 import { Price } from "@/components/CurrencyProvider";
 import { StarRating } from "@/components/ui/StarRating";
 import { ProductImage } from "@/components/ProductImage";
 import { Badge } from "@/components/ui/Badge";
 
-type ProductWithRelations = Product & {
-  category?: Category | null;
-  seller?: Pick<SellerProfile, "storeName" | "slug"> | SellerProfile | null;
+export type CardProduct = {
+  id: string;
+  slug: string;
+  name: string;
+  price: number;
+  compareAt: number | null;
+  stock: number;
+  imageUrl: string;
+  rating: number;
+  reviewCount: number;
+  seller?: { storeName: string; slug: string } | null;
 };
 
-export function ProductCard({ product }: { product: ProductWithRelations }) {
+export function ProductCard({ product }: { product: CardProduct }) {
   const discount =
     product.compareAt && product.compareAt > product.price
       ? Math.round(((product.compareAt - product.price) / product.compareAt) * 100)
@@ -24,7 +32,7 @@ export function ProductCard({ product }: { product: ProductWithRelations }) {
           alt={product.name}
           className="absolute inset-0 p-4"
           imageClassName="group-hover:scale-[1.03] transition-transform duration-200 object-contain"
-          sizes="(max-width:768px) 50vw, 20vw"
+          sizes="(max-width:640px) 50vw, (max-width:1280px) 25vw, 16vw"
         />
         {discount != null && (
           <span className="absolute top-3 left-3 z-10">
@@ -53,16 +61,29 @@ export function ProductCard({ product }: { product: ProductWithRelations }) {
   );
 }
 
-export function ProductGrid({ products }: { products: ProductWithRelations[] }) {
+const gridLayout = {
+  default: "grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
+  home: "grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 md:gap-4 xl:grid-cols-6",
+};
+
+export function ProductGrid({
+  products,
+  empty = "No products found. Try adjusting your filters.",
+  variant = "default",
+}: {
+  products: CardProduct[];
+  empty?: string;
+  variant?: keyof typeof gridLayout;
+}) {
   if (products.length === 0) {
     return (
       <div className="lx-card p-10 text-center text-[var(--muted)] w-full">
-        No products found. Try adjusting your filters.
+        {empty}
       </div>
     );
   }
   return (
-    <div className="w-full grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <div className={cn("grid w-full", gridLayout[variant])}>
       {products.map((p) => (
         <ProductCard key={p.id} product={p} />
       ))}

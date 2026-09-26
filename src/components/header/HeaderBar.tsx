@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Search, ShoppingCart, Store } from "lucide-react";
+import { Menu, Search, ShoppingCart, Store, X } from "lucide-react";
 import { CategoriesOverlay } from "@/components/categories/CategoriesOverlay";
+import { useCategoriesPanel } from "@/components/categories/CategoriesPanelContext";
 import { LocaleMenu } from "@/components/header/LocaleMenu";
 import { NotificationMenu } from "@/components/header/NotificationMenu";
 import { UserMenu } from "@/components/header/UserMenu";
@@ -19,20 +20,27 @@ function Logo() {
   );
 }
 
-function SearchForm({ className }: { className?: string }) {
+function SearchForm({
+  className,
+  inputRef,
+}: {
+  className?: string;
+  inputRef?: React.RefObject<HTMLInputElement | null>;
+}) {
   return (
     <form action="/search" method="get" className={cn("lx-search min-w-0", className)} role="search">
-      <div className="flex w-full items-center overflow-hidden rounded border border-transparent bg-white focus-within:ring-2 focus-within:ring-white/70">
+      <div className="flex w-full items-center overflow-hidden rounded-full border border-transparent bg-white focus-within:ring-2 focus-within:ring-white/70">
         <input
+          ref={inputRef}
           type="search"
           name="q"
           placeholder="Search products, brands, categories…"
-          className="h-11 min-w-0 flex-1 bg-white px-4 text-[#111111] outline-none placeholder:text-[#666666]"
+          className="h-11 min-w-0 flex-1 bg-white px-5 text-[#111111] outline-none placeholder:text-[#666666]"
           aria-label="Search"
         />
         <button
           type="submit"
-          className="lx-focus inline-flex h-11 w-12 items-center justify-center bg-white text-[#111111] hover:bg-[#f3f3f3]"
+          className="lx-focus inline-flex h-11 w-12 shrink-0 items-center justify-center bg-white text-[#111111] hover:bg-[#f3f3f3]"
           aria-label="Search"
         >
           <Search className="h-5 w-5" aria-hidden />
@@ -126,7 +134,10 @@ export function HeaderBar({
   notifications: HeaderNotification[];
 }) {
   const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const categoriesButtonRef = useRef<HTMLButtonElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const panel = useCategoriesPanel();
   const pathname = usePathname();
   const [pathSnapshot, setPathSnapshot] = useState(pathname);
   const showBecomeSeller = !user || !user.isSeller;
@@ -135,7 +146,25 @@ export function HeaderBar({
   if (pathname !== pathSnapshot) {
     setPathSnapshot(pathname);
     if (categoriesOpen) setCategoriesOpen(false);
+    if (searchOpen) setSearchOpen(false);
   }
+
+  useEffect(() => {
+    return panel.register((button) => {
+      if (button) categoriesButtonRef.current = button;
+      setCategoriesOpen(true);
+    });
+  }, [panel]);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    searchInputRef.current?.focus();
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setSearchOpen(false);
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [searchOpen]);
 
   function openCategories(button: HTMLButtonElement) {
     categoriesButtonRef.current = button;
@@ -161,27 +190,30 @@ export function HeaderBar({
         </div>
       </div>
 
-      <div className="space-y-2 px-3 py-2 lg:hidden">
-        <div className="relative flex h-12 items-center">
-          <div className="relative z-10 flex min-w-0 items-center">
-            <Logo />
-          </div>
-          <div className="pointer-events-none absolute left-1/2 -translate-x-1/2">
-            <span className="pointer-events-auto">
-              <CategoriesButton expanded={categoriesOpen} onOpen={openCategories} className="min-w-0 max-w-[34vw]" />
-            </span>
-          </div>
-          <div className="relative z-10 ml-auto flex items-center gap-1">
+      <div className="px-3 py-2 lg:hidden">
+        <div className="flex h-12 items-center gap-1">
+          <Logo />
+          <div className="ml-auto flex items-center gap-0.5">
+            <button
+              type="button"
+              className="lx-focus inline-flex h-11 w-11 items-center justify-center rounded-full text-white hover:bg-white/15"
+              aria-label={searchOpen ? "Close search" : "Search"}
+              aria-expanded={searchOpen}
+              aria-controls="mobile-search"
+              onClick={() => setSearchOpen((open) => !open)}
+            >
+              {searchOpen ? <X className="h-5 w-5" aria-hidden /> : <Search className="h-5 w-5" aria-hidden />}
+            </button>
             <NotificationMenu notifications={notifications} signedIn={Boolean(user)} />
             <CartLink count={cartCount} />
             <AccountSlot user={user} />
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <SearchForm className="min-w-0 flex-1" />
-          <LocaleMenu compact align="end" />
-        </div>
-        {showBecomeSeller && <BecomeSellerLink href={becomeHref} className="w-full" />}
+        {searchOpen && (
+          <div id="mobile-search" className="pb-2">
+            <SearchForm inputRef={searchInputRef} />
+          </div>
+        )}
       </div>
 
       <CategoriesOverlay
