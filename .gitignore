@@ -21,7 +21,13 @@
 # misc
 .DS_Store
 *.pem
-.cursor/
+.cursor/*
+!.cursor/hooks.json
+!.cursor/hooks/
+!.cursor/hooks/**
+
+# agent-capture internal session state (logs themselves are committed)
+.agent-logs/.state/
 
 # debug
 npm-debug.log*

@@ -1,116 +1,145 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
-import { removeCartItemAction, updateCartItemAction } from "@/lib/actions";
 import { ProductImage } from "@/components/ProductImage";
 
-type CartItemView = {
+type CartItem = {
   id: string;
   quantity: number;
   product: {
     id: string;
     name: string;
     slug: string;
-    price: number;
     imageUrl: string;
+    price: number;
     stock: number;
-    seller?: { storeName: string } | null;
   };
+  variant: { id: string; name: string; priceDelta: number; stock: number } | null;
 };
 
-export function CartItems({ items }: { items: CartItemView[] }) {
-  const [pending, startTransition] = useTransition();
+type Totals = { subtotal: number; shipping: number; tax: number; total: number; itemCount: number };
+
+export function CartClient({ initialItems, initialTotals }: { initialItems: CartItem[]; initialTotals: Totals }) {
+  const router = useRouter();
+  const [items, setItems] = useState(initialItems);
+  const [totals, setTotals] = useState(initialTotals);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  async function sync(method: string, body: object) {
+    const res = await fetch("/api/cart", {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Cart update failed");
+    setItems(data.cart.items);
+    setTotals(data.totals);
+    router.refresh();
+  }
 
   if (items.length === 0) {
     return (
-      <div className="bg-white border border-mh-border rounded-lg p-8 text-center">
-        <h2 className="text-xl font-bold mb-2">Your Lixazon Cart is empty</h2>
-        <p className="text-mh-muted mb-4">Browse categories and add items to get started.</p>
-        <Link href="/" className="text-mh-link hover:underline">
-          Continue shopping
+      <div className="lx-card p-10 text-center">
+        <p className="font-heading text-xl font-bold">Your cart is empty</p>
+        <Link href="/search" className="inline-block mt-4">
+          <Button>Continue shopping</Button>
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="bg-white border border-mh-border rounded-lg divide-y divide-mh-border">
-      <div className="px-4 py-3">
-        <h1 className="text-2xl font-bold">Shopping Cart</h1>
-      </div>
-      {items.map((item) => (
-        <div key={item.id} className="flex gap-4 p-4">
-          <Link href={`/product/${item.product.slug}`} className="relative w-28 h-28 shrink-0 rounded overflow-hidden block">
-            <ProductImage
-              src={item.product.imageUrl}
-              alt={item.product.name}
-              className="absolute inset-0 rounded"
-              sizes="112px"
-            />
-          </Link>
-          <div className="flex-1 min-w-0">
-            <Link href={`/product/${item.product.slug}`} className="font-medium hover:text-mh-link-hover line-clamp-2">
-              {item.product.name}
-            </Link>
-            {item.product.seller && (
-              <p className="text-xs text-mh-muted mt-0.5">Sold by {item.product.seller.storeName}</p>
-            )}
-            <p className="text-mh-stock text-sm mt-1">
-              {item.product.stock > 0 ? "In Stock" : "Out of Stock"}
-            </p>
-            <div className="flex flex-wrap items-center gap-3 mt-3">
-              <select
-                value={item.quantity}
-                disabled={pending}
-                onChange={(e) => {
-                  const q = Number(e.target.value);
-                  startTransition(async () => {
-                    await updateCartItemAction(item.id, q);
-                  });
-                }}
-                className="h-8 border border-mh-border rounded-md px-2 bg-mh-soft text-sm"
-              >
-                {Array.from({ length: Math.min(item.product.stock, 10) }, (_, i) => i + 1).map((n) => (
-                  <option key={n} value={n}>
-                    Qty: {n}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="button"
-                className="text-sm text-mh-link hover:underline"
-                disabled={pending}
-                onClick={() => startTransition(() => removeCartItemAction(item.id))}
-              >
-                Delete
-              </button>
+    <div className="grid lg:grid-cols-[1fr_320px] gap-6">
+      <div className="space-y-3">
+        {items.map((item) => {
+          const unit = item.product.price + (item.variant?.priceDelta ?? 0);
+          return (
+            <div key={item.id} className="lx-card p-4 flex gap-4">
+              <div className="h-24 w-24 rounded-2xl overflow-hidden lx-module-sky shrink-0 relative">
+                <ProductImage src={item.product.imageUrl} alt={item.product.name} className="absolute inset-0 p-2" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <Link href={`/product/${item.product.slug}`} className="font-medium hover:text-[var(--sky)]">
+                  {item.product.name}
+                </Link>
+                {item.variant && <p className="text-xs text-[var(--text-muted)]">{item.variant.name}</p>}
+                <p className="font-bold mt-1">{formatPrice(unit)}</p>
+                <div className="mt-2 flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={busy === item.id}
+                    onClick={async () => {
+                      setBusy(item.id);
+                      await sync("PATCH", { itemId: item.id, quantity: item.quantity - 1 });
+                      setBusy(null);
+                    }}
+                  >
+                    −
+                  </Button>
+                  <span className="w-8 text-center text-sm">{item.quantity}</span>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={busy === item.id}
+                    onClick={async () => {
+                      setBusy(item.id);
+                      await sync("PATCH", { itemId: item.id, quantity: item.quantity + 1 });
+                      setBusy(null);
+                    }}
+                  >
+                    +
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={busy === item.id}
+                    onClick={async () => {
+                      setBusy(item.id);
+                      await sync("DELETE", { itemId: item.id });
+                      setBusy(null);
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              </div>
+              <div className="font-semibold">{formatPrice(unit * item.quantity)}</div>
             </div>
+          );
+        })}
+      </div>
+      <aside className="lx-card p-5 h-fit sticky top-28">
+        <h2 className="font-heading text-lg font-bold">Order summary</h2>
+        <dl className="mt-4 space-y-2 text-sm">
+          <div className="flex justify-between">
+            <dt>Subtotal ({totals.itemCount})</dt>
+            <dd>{formatPrice(totals.subtotal)}</dd>
           </div>
-          <div className="font-bold text-right">{formatPrice(item.product.price)}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function CartSummary({ subtotal, count }: { subtotal: number; count: number }) {
-  return (
-    <div className="bg-white border border-mh-border rounded-lg p-4 sticky top-24">
-      <p className="text-lg">
-        Subtotal ({count} {count === 1 ? "item" : "items"}):{" "}
-        <span className="font-bold">{formatPrice(subtotal)}</span>
-      </p>
-      <p className="text-xs text-mh-muted mt-1 mb-4">
-        {subtotal >= 35 ? "Qualifies for FREE Shipping" : `Add ${formatPrice(35 - subtotal)} for FREE Shipping`}
-      </p>
-      <Link href="/checkout">
-        <Button variant="cta" size="lg" className="w-full">
-          Proceed to checkout
-        </Button>
-      </Link>
+          <div className="flex justify-between">
+            <dt>Shipping</dt>
+            <dd>{totals.shipping === 0 ? "Free" : formatPrice(totals.shipping)}</dd>
+          </div>
+          <div className="flex justify-between">
+            <dt>Tax est.</dt>
+            <dd>{formatPrice(totals.tax)}</dd>
+          </div>
+          <div className="flex justify-between font-bold text-base pt-2 border-t border-[var(--border)]">
+            <dt>Total</dt>
+            <dd>{formatPrice(totals.total)}</dd>
+          </div>
+        </dl>
+        <Link href="/checkout" className="block mt-5">
+          <Button className="w-full" size="lg" variant="coral">
+            Checkout
+          </Button>
+        </Link>
+      </aside>
     </div>
   );
 }

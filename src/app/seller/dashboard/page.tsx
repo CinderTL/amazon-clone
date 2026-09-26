@@ -68,28 +68,28 @@ export default async function SellerDashboardPage() {
           { label: "Units sold", value: String(unitsSold) },
           { label: "Products", value: String(products) },
         ].map((s) => (
-          <div key={s.label} className="bg-white border border-mh-border rounded-lg p-4">
-            <p className="text-xs text-mh-muted uppercase">{s.label}</p>
+          <div key={s.label} className="lx-card p-4">
+            <p className="text-xs text-[var(--text-muted)] uppercase">{s.label}</p>
             <p className="text-xl font-bold mt-1">{s.value}</p>
           </div>
         ))}
       </div>
 
       <div className="grid lg:grid-cols-2 gap-4 mb-4">
-        <div className="bg-white border border-mh-border rounded-lg p-4">
+        <div className="lx-card p-4">
           <h2 className="font-bold mb-3">Revenue (7 days)</h2>
           <SellerCharts data={chartData} statusCounts={statusCounts} />
         </div>
-        <div className="bg-white border border-mh-border rounded-lg p-4">
+        <div className="lx-card p-4">
           <h2 className="font-bold mb-3">Low stock alerts</h2>
           {lowStock.length === 0 ? (
-            <p className="text-sm text-mh-muted">All products well stocked.</p>
+            <p className="text-sm text-[var(--text-muted)]">All products well stocked.</p>
           ) : (
             <ul className="space-y-2">
               {lowStock.map((p) => (
-                <li key={p.id} className="flex justify-between text-sm border-b border-mh-border pb-2">
+                <li key={p.id} className="flex justify-between text-sm border-b border-[var(--border)] pb-2">
                   <span className="line-clamp-1 pr-2">{p.name}</span>
-                  <span className={p.stock <= 5 ? "text-mh-danger font-bold" : "text-mh-muted"}>
+                  <span className={p.stock <= 5 ? "text-[var(--coral)] font-bold" : "text-[var(--text-muted)]"}>
                     {p.stock} left
                   </span>
                 </li>
@@ -99,12 +99,12 @@ export default async function SellerDashboardPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-mh-border rounded-lg p-4">
+      <div className="lx-card p-4">
         <h2 className="font-bold mb-3">Recent order items</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-mh-muted border-b border-mh-border">
+              <tr className="text-left text-[var(--text-muted)] border-b border-[var(--border)]">
                 <th className="py-2 pr-2">Order</th>
                 <th className="py-2 pr-2">Product</th>
                 <th className="py-2 pr-2">Qty</th>
@@ -115,7 +115,7 @@ export default async function SellerDashboardPage() {
             </thead>
             <tbody>
               {recent.map((i) => (
-                <tr key={i.id} className="border-b border-mh-border last:border-0">
+                <tr key={i.id} className="border-b border-[var(--border)] last:border-0">
                   <td className="py-2 pr-2">{i.order.orderNumber}</td>
                   <td className="py-2 pr-2 max-w-[180px] truncate">{i.name}</td>
                   <td className="py-2 pr-2">{i.quantity}</td>
@@ -126,7 +126,7 @@ export default async function SellerDashboardPage() {
               ))}
               {recent.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-6 text-center text-mh-muted">
+                  <td colSpan={6} className="py-6 text-center text-[var(--text-muted)]">
                     No orders yet
                   </td>
                 </tr>

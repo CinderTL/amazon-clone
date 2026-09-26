@@ -10,12 +10,15 @@ export function StarRating({ rating, count, size = "sm" }: { rating: number; cou
         {Array.from({ length: 5 }).map((_, i) => (
           <Star
             key={i}
-            className={cn(starSize, i < full ? "fill-mh-rating text-mh-rating" : "fill-mh-border text-mh-border")}
+            className={cn(
+              starSize,
+              i < full ? "fill-[var(--mustard)] text-[var(--mustard)]" : "fill-[var(--border)] text-[var(--border)]"
+            )}
           />
         ))}
       </div>
-      <span className="text-xs text-mh-link">{rating.toFixed(1)}</span>
-      {count != null && <span className="text-xs text-mh-muted">({count.toLocaleString()})</span>}
+      <span className="text-xs text-[var(--sky)]">{rating.toFixed(1)}</span>
+      {count != null && <span className="text-xs text-[var(--text-muted)]">({count.toLocaleString()})</span>}
     </div>
   );
 }

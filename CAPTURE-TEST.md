@@ -3,7 +3,7 @@
 ## Tool and model (step 1)
 
 - **Tool:** Cursor
-- **Model:** Composer (Auto) — same model plans and executes in the agent session
+- **Model:** Composer (Auto) — same model plans and executes in the agent session (hook payload currently reports `model: default`)
 - **Automatic capture:** Yes — Cursor project hooks
 
 ## Mechanism and config
@@ -19,54 +19,87 @@ Invoked as `python3 .cursor/hooks/agent-capture.py` (not as a bare executable).
 
 | Canary | Session | Log path |
 |--------|---------|----------|
-| 1 | `5c9b42e4-16cc-4a1d-933e-0dbce8b3c2db` | `.agent-logs/2026-09-24_08-40-50_5c9b42e4-16cc-4a1d-933e-0dbce8b3c2db.md` |
-| 2 | `b21e7d3b-35f8-4c30-93da-45ad17273078` | `.agent-logs/2026-09-24_08-43-32_b21e7d3b-35f8-4c30-93da-45ad17273078.md` |
+| 1 | `9191017f-3e0e-47e5-9586-fe6bed398282` | `.agent-logs/2026-09-25_13-54-23_9191017f-3e0e-47e5-9586-fe6bed398282.md` |
+| 2 | `c271ae98-57b3-495d-addc-859a137e4430` | `.agent-logs/2026-09-25_13-55-15_c271ae98-57b3-495d-addc-859a137e4430.md` |
 
 Both sessions produced separate log files, so the hook is installed at the project level (not only in the session that created it).
 
 ## Canary 1 — raw (from log)
 
 ````
-[LOG_ENTRY type=PROMPT num=1 session=5c9b42e4]
-timestamp: 2026-09-24T08:42:41.004Z
-model: composer
+[LOG_ENTRY type=PROMPT num=1 session=9191017f]
+timestamp: 2026-09-25T13:54:49.614Z
+model: default
 
 CAPTURE TEST — 8x assignment, CinderTL
 
 
-[LOG_ENTRY type=RESPONSE num=1 session=5c9b42e4]
-timestamp: 2026-09-24T08:43:10.353Z
-model: composer
+[LOG_ENTRY type=RESPONSE num=1 session=9191017f]
+timestamp: 2026-09-25T13:55:09.552Z
+model: default
 
 **Canary 1 — prompt captured.**
 
-Log file: `.agent-logs/2026-09-24_08-40-50_5c9b42e4-16cc-4a1d-933e-0dbce8b3c2db.md`
+Log: `.agent-logs/2026-09-25_13-54-23_9191017f-3e0e-47e5-9586-fe6bed398282.md`
 
-The PROMPT entry is there. This reply is the RESPONSE; `afterAgentResponse` should append it when the turn ends.
+```
+[LOG_ENTRY type=PROMPT num=1 session=9191017f]
+timestamp: 2026-09-25T13:54:49.614Z
+model: default
 
-**Next:** open a **new** Agent chat in this repo and send again:
+CAPTURE TEST — 8x assignment, CinderTL
+```
+
+This reply is the RESPONSE; `afterAgentResponse` should append it when the turn ends.
+
+**Next:** open a **new** Agent chat in this repo and send:
 
 ```text
 CAPTURE TEST — 8x assignment, CinderTL
 ```
 
 Then come back here (or say “canary 2 done”) so I can confirm the second session log and write `CAPTURE-TEST.md`. Do not start the assignment yet.
+
+---
+git commit message: confirm canary 1 agent-capture prompt landed in session log
 ````
 
 ## Canary 2 — raw (from log)
 
-Prompt captured in the second session (below). The RESPONSE for this turn is appended to the same file by `afterAgentResponse` when the turn ends (confirmation that wrote this file).
-
 ````
-[LOG_ENTRY type=PROMPT num=1 session=b21e7d3b]
-timestamp: 2026-09-24T08:43:36.697Z
-model: composer
+[LOG_ENTRY type=PROMPT num=1 session=c271ae98]
+timestamp: 2026-09-25T13:55:17.535Z
+model: default
 
 CAPTURE TEST — 8x assignment, CinderTL
+
+
+[LOG_ENTRY type=RESPONSE num=1 session=c271ae98]
+timestamp: 2026-09-25T13:55:35.732Z
+model: default
+
+**Canary 2 — prompt captured.**
+
+Log: `.agent-logs/2026-09-25_13-55-15_c271ae98-57b3-495d-addc-859a137e4430.md`
+
+```
+[LOG_ENTRY type=PROMPT num=1 session=c271ae98]
+timestamp: 2026-09-25T13:55:17.535Z
+model: default
+
+CAPTURE TEST — 8x assignment, CinderTL
+```
+
+Separate session from canary 1 (`9191017f` → this `c271ae98`), so project-level hooks are working. Author resolves as `CinderTL`. This reply is the RESPONSE; `afterAgentResponse` should append it when the turn ends.
+
+Capture is verified. You can go back to the other chat and say “canary 2 done”, or start the assignment here.
+
+git commit message: confirm canary 2 agent-capture in a new session log
 ````
 
 ## What did not work first
 
-1. **Executable bit / shebang:** Initial `.cursor/hooks.json` used `.cursor/hooks/agent-capture.py` directly. Sandbox/`chmod +x` failed; switched commands to `python3 .cursor/hooks/agent-capture.py`.
-2. **First setup turn:** The assignment paste that installed the hooks was submitted *before* the hooks existed, so that turn was not auto-captured (expected). Canaries after install are what prove capture.
-3. **Dry-run cleanup:** Temporary dry-run log files under `.agent-logs/` were removed so only real canary sessions remain.
+1. **Missing hooks after clone:** `.gitignore` had `.cursor/`, so `.cursor/hooks.json` and `agent-capture.py` never shipped with the repo. Historical `.agent-logs/` existed, but new sessions wrote nothing until hooks were restored.
+2. **First setup turn:** The message that installed the hooks was submitted *before* the hooks existed, so that turn’s prompt was not auto-captured (expected). `afterAgentResponse` did fire afterward and left an orphan RESPONSE at the top of canary 1’s log — left as-is.
+3. **Dry-run cleanup:** Temporary dry-run log files under `.agent-logs/` were removed so only real canary sessions remain (plus prior committed session logs).
+4. **Gitignore fix:** Changed to ignore `.cursor/*` but un-ignore `.cursor/hooks.json` and `.cursor/hooks/**` so capture config can be committed.

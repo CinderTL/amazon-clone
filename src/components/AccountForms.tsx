@@ -1,58 +1,93 @@
 "use client";
 
-import { useActionState } from "react";
-import { useFormStatus } from "react-dom";
-import { updateProfileAction, changePasswordAction, type ActionState } from "@/lib/actions";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { Input, Label, FormError, FormSuccess } from "@/components/ui/Form";
+import { Input, Label, Select } from "@/components/ui/Form";
 
-function Submit({ label }: { label: string }) {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" variant="cta" disabled={pending}>
-      {pending ? "Saving…" : label}
-    </Button>
-  );
-}
+export function ProfileForm({
+  user,
+}: {
+  user: { name: string; email: string; phone: string | null; themePref: string | null };
+}) {
+  const router = useRouter();
+  const [message, setMessage] = useState("");
 
-export function ProfileForm({ name, email, phone }: { name: string; email: string; phone: string }) {
-  const [state, action] = useActionState(updateProfileAction, {} as ActionState);
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const res = await fetch("/api/account/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: form.get("name"),
+        phone: form.get("phone") || null,
+        themePref: form.get("themePref") || null,
+      }),
+    });
+    setMessage(res.ok ? "Saved" : "Could not save");
+    router.refresh();
+  }
+
   return (
-    <form action={action} className="space-y-4 max-w-md">
+    <form onSubmit={onSubmit} className="lx-card p-6 space-y-4 max-w-lg">
       <div>
-        <Label htmlFor="name">Name</Label>
-        <Input id="name" name="name" defaultValue={name} required />
+        <Label>Email</Label>
+        <Input value={user.email} disabled />
       </div>
       <div>
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" defaultValue={email} disabled />
+        <Label>Name</Label>
+        <Input name="name" defaultValue={user.name} required />
       </div>
       <div>
-        <Label htmlFor="phone">Phone</Label>
-        <Input id="phone" name="phone" defaultValue={phone} />
+        <Label>Phone</Label>
+        <Input name="phone" defaultValue={user.phone || ""} />
       </div>
-      <FormError message={state.error} />
-      <FormSuccess message={state.success} />
-      <Submit label="Save changes" />
+      <div>
+        <Label>Theme preference</Label>
+        <Select name="themePref" defaultValue={user.themePref || "system"}>
+          <option value="system">System</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </Select>
+      </div>
+      {message && <p className="text-sm text-[var(--mint)]">{message}</p>}
+      <Button type="submit">Save profile</Button>
     </form>
   );
 }
 
 export function PasswordForm() {
-  const [state, action] = useActionState(changePasswordAction, {} as ActionState);
+  const [message, setMessage] = useState("");
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const res = await fetch("/api/account/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        currentPassword: form.get("currentPassword"),
+        newPassword: form.get("newPassword"),
+      }),
+    });
+    const data = await res.json();
+    setMessage(res.ok && !data.error ? "Password updated" : data.error || "Failed");
+  }
+
   return (
-    <form action={action} className="space-y-4 max-w-md">
+    <form onSubmit={onSubmit} className="lx-card p-6 space-y-4 max-w-lg">
       <div>
-        <Label htmlFor="currentPassword">Current password</Label>
-        <Input id="currentPassword" name="currentPassword" type="password" required />
+        <Label>Current password</Label>
+        <Input name="currentPassword" type="password" required />
       </div>
       <div>
-        <Label htmlFor="newPassword">New password</Label>
-        <Input id="newPassword" name="newPassword" type="password" required minLength={6} />
+        <Label>New password</Label>
+        <Input name="newPassword" type="password" minLength={8} required />
       </div>
-      <FormError message={state.error} />
-      <FormSuccess message={state.success} />
-      <Submit label="Update password" />
+      {message && <p className="text-sm">{message}</p>}
+      <Button type="submit" variant="secondary">
+        Update password
+      </Button>
     </form>
   );
 }

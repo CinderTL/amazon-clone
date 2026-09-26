@@ -1,26 +1,25 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { jwtVerify } from "jose";
 
 const COOKIE_NAME = "mh_session";
 
-/** Lightweight base64url JWT payload peek (signature verified in server components). */
-function peekRole(token: string): string | null {
+async function verifyRole(token: string): Promise<string | null> {
   try {
-    const parts = token.split(".");
-    if (parts.length < 2) return null;
-    const json = atob(parts[1].replace(/-/g, "+").replace(/_/g, "/"));
-    const payload = JSON.parse(json) as { role?: string; exp?: number };
+    const secret = process.env.AUTH_SECRET;
+    if (!secret) return null;
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
     if (payload.exp && payload.exp * 1000 < Date.now()) return null;
-    return payload.role || null;
+    return (payload.role as string) || null;
   } catch {
     return null;
   }
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get(COOKIE_NAME)?.value;
-  const role = token ? peekRole(token) : null;
+  const role = token ? await verifyRole(token) : null;
 
   if (pathname.startsWith("/seller")) {
     if (!role) {

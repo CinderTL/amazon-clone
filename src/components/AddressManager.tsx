@@ -1,19 +1,9 @@
 "use client";
 
-import { useActionState, useTransition } from "react";
-import { useFormStatus } from "react-dom";
-import { saveAddressAction, deleteAddressAction, type ActionState } from "@/lib/actions";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { Input, Label, FormError, FormSuccess } from "@/components/ui/Form";
-
-function Submit() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" variant="cta" disabled={pending}>
-      {pending ? "Saving…" : "Save address"}
-    </Button>
-  );
-}
+import { Input, Label } from "@/components/ui/Form";
 
 type Address = {
   id: string;
@@ -29,91 +19,131 @@ type Address = {
   isDefault: boolean;
 };
 
-export function AddressManager({ addresses }: { addresses: Address[] }) {
-  const [state, action] = useActionState(saveAddressAction, {} as ActionState);
-  const [pending, startTransition] = useTransition();
+export function AddressManager({ initial }: { initial: Address[] }) {
+  const router = useRouter();
+  const [addresses, setAddresses] = useState(initial);
+  const [error, setError] = useState("");
+
+  async function refresh() {
+    const res = await fetch("/api/addresses");
+    const data = await res.json();
+    if (res.ok) setAddresses(data.addresses);
+    router.refresh();
+  }
+
+  async function create(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError("");
+    const form = new FormData(e.currentTarget);
+    const res = await fetch("/api/addresses", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        label: form.get("label"),
+        fullName: form.get("fullName"),
+        line1: form.get("line1"),
+        line2: form.get("line2") || null,
+        city: form.get("city"),
+        state: form.get("state"),
+        postalCode: form.get("postalCode"),
+        country: form.get("country") || "United States",
+        phone: form.get("phone") || null,
+        isDefault: form.get("isDefault") === "on",
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error || "Failed");
+      return;
+    }
+    e.currentTarget.reset();
+    await refresh();
+  }
+
+  async function remove(id: string) {
+    await fetch("/api/addresses", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    await refresh();
+  }
 
   return (
-    <div className="grid md:grid-cols-2 gap-4">
+    <div className="grid lg:grid-cols-2 gap-6">
       <div className="space-y-3">
-        {addresses.length === 0 && (
-          <p className="text-mh-muted text-sm">No addresses yet. Add one on the right.</p>
-        )}
         {addresses.map((a) => (
-          <div key={a.id} className="bg-white border border-mh-border rounded-lg p-4 text-sm">
-            {a.isDefault && (
-              <span className="text-xs font-bold text-mh-stock uppercase">Default</span>
-            )}
-            <p className="font-bold">{a.label}</p>
-            <p>{a.fullName}</p>
-            <p>{a.line1}</p>
-            {a.line2 && <p>{a.line2}</p>}
-            <p>
-              {a.city}, {a.state} {a.postalCode}
-            </p>
-            <p>{a.country}</p>
-            {a.phone && <p>{a.phone}</p>}
-            <button
-              type="button"
-              disabled={pending}
-              className="mt-2 text-mh-danger text-xs hover:underline"
-              onClick={() => startTransition(() => deleteAddressAction(a.id))}
-            >
-              Remove
-            </button>
+          <div key={a.id} className="lx-card p-4">
+            <div className="flex justify-between gap-2">
+              <div>
+                <p className="font-semibold">
+                  {a.label} {a.isDefault && <span className="text-xs text-[var(--mint)]">Default</span>}
+                </p>
+                <p className="text-sm text-[var(--text-muted)] mt-1">
+                  {a.fullName}
+                  <br />
+                  {a.line1}
+                  {a.line2 ? `, ${a.line2}` : ""}
+                  <br />
+                  {a.city}, {a.state} {a.postalCode}
+                </p>
+              </div>
+              <Button size="sm" variant="ghost" onClick={() => remove(a.id)}>
+                Delete
+              </Button>
+            </div>
           </div>
         ))}
       </div>
-
-      <form action={action} className="bg-white border border-mh-border rounded-lg p-4 space-y-3 h-fit">
-        <h2 className="font-bold">Add a new address</h2>
+      <form onSubmit={create} className="lx-card p-5 space-y-3">
+        <h2 className="font-heading font-bold">Add address</h2>
+        {error && <p className="text-sm text-[var(--coral)]">{error}</p>}
         <div>
-          <Label htmlFor="label">Label</Label>
-          <Input id="label" name="label" defaultValue="Home" />
+          <Label>Label</Label>
+          <Input name="label" defaultValue="Home" />
         </div>
         <div>
-          <Label htmlFor="fullName">Full name</Label>
-          <Input id="fullName" name="fullName" required />
+          <Label>Full name</Label>
+          <Input name="fullName" required />
         </div>
         <div>
-          <Label htmlFor="line1">Address line 1</Label>
-          <Input id="line1" name="line1" required />
+          <Label>Line 1</Label>
+          <Input name="line1" required />
         </div>
         <div>
-          <Label htmlFor="line2">Address line 2</Label>
-          <Input id="line2" name="line2" />
+          <Label>Line 2</Label>
+          <Input name="line2" />
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <Label htmlFor="city">City</Label>
-            <Input id="city" name="city" required />
+            <Label>City</Label>
+            <Input name="city" required />
           </div>
           <div>
-            <Label htmlFor="state">State</Label>
-            <Input id="state" name="state" required />
+            <Label>State</Label>
+            <Input name="state" required />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <Label htmlFor="postalCode">ZIP</Label>
-            <Input id="postalCode" name="postalCode" required />
+            <Label>Postal</Label>
+            <Input name="postalCode" required />
           </div>
           <div>
-            <Label htmlFor="country">Country</Label>
-            <Input id="country" name="country" defaultValue="United States" />
+            <Label>Country</Label>
+            <Input name="country" defaultValue="United States" />
           </div>
         </div>
         <div>
-          <Label htmlFor="phone">Phone</Label>
-          <Input id="phone" name="phone" />
+          <Label>Phone</Label>
+          <Input name="phone" />
         </div>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="isDefault" />
-          Make default
+          <input type="checkbox" name="isDefault" /> Default address
         </label>
-        <FormError message={state.error} />
-        <FormSuccess message={state.success} />
-        <Submit />
+        <Button type="submit" className="w-full">
+          Save address
+        </Button>
       </form>
     </div>
   );

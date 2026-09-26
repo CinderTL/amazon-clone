@@ -10,11 +10,11 @@ export default async function SellerSettingsPage() {
   return (
     <SellerShell current="/seller/settings" title="Settings">
       <div className="space-y-4">
-        <div className="bg-white border border-mh-border rounded-lg p-4">
+        <div className="lx-card p-4">
           <h2 className="font-bold mb-3">Account profile</h2>
-          <ProfileForm name={user.name} email={user.email} phone={user.phone || ""} />
+          <ProfileForm user={{ name: user.name, email: user.email, phone: user.phone, themePref: user.themePref }} />
         </div>
-        <div className="bg-white border border-mh-border rounded-lg p-4">
+        <div className="lx-card p-4">
           <h2 className="font-bold mb-3">Change password</h2>
           <PasswordForm />
         </div>

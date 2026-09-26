@@ -1,55 +1,45 @@
-import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-type ButtonProps = {
-  children: ReactNode;
-  variant?: "cta" | "buy" | "secondary" | "ghost" | "danger";
-  size?: "sm" | "md" | "lg";
-  className?: string;
-  type?: "button" | "submit" | "reset";
-  disabled?: boolean;
-  onClick?: () => void;
-  formAction?: (formData: FormData) => void;
+type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: "primary" | "secondary" | "ghost" | "coral" | "sky" | "mint" | "mustard" | "danger";
+  size?: "sm" | "md" | "lg" | "icon";
 };
 
-const variants = {
-  cta: "bg-gradient-to-b from-mh-cta-top to-mh-cta-bottom border border-mh-cta-border text-mh-text hover:brightness-95",
-  buy: "bg-mh-buy border border-mh-cta-border text-mh-text hover:brightness-95",
-  secondary: "bg-mh-soft border border-mh-border text-mh-text hover:bg-white",
-  ghost: "bg-transparent border border-transparent text-mh-link hover:text-mh-link-hover hover:underline",
-  danger: "bg-white border border-mh-danger text-mh-danger hover:bg-red-50",
+const variantClass: Record<NonNullable<ButtonProps["variant"]>, string> = {
+  primary: "bg-[var(--sky)] text-white hover:opacity-90",
+  secondary: "bg-[var(--surface-elevated)] text-[var(--text)] border border-[var(--border)] hover:border-[var(--sky)]",
+  ghost: "bg-transparent text-[var(--text)] hover:bg-[var(--bg-page)]",
+  coral: "bg-[var(--coral)] text-white hover:opacity-90",
+  sky: "bg-[var(--sky)] text-white hover:opacity-90",
+  mint: "bg-[var(--mint)] text-white hover:opacity-90",
+  mustard: "bg-[var(--mustard)] text-[var(--text)] hover:opacity-90",
+  danger: "bg-[var(--coral)] text-white hover:opacity-90",
 };
 
-const sizes = {
-  sm: "h-8 px-3 text-xs rounded-md",
-  md: "h-9 px-4 text-sm rounded-lg",
-  lg: "h-11 px-5 text-sm rounded-full",
+const sizeClass: Record<NonNullable<ButtonProps["size"]>, string> = {
+  sm: "h-8 px-3 text-xs",
+  md: "h-10 px-4 text-sm",
+  lg: "h-12 px-6 text-base",
+  icon: "h-10 w-10 p-0",
 };
 
 export function Button({
-  children,
-  variant = "cta",
-  size = "md",
   className,
+  variant = "primary",
+  size = "md",
   type = "button",
-  disabled,
-  onClick,
-  formAction,
+  ...props
 }: ButtonProps) {
   return (
     <button
       type={type}
-      disabled={disabled}
-      onClick={onClick}
-      formAction={formAction}
       className={cn(
-        "inline-flex items-center justify-center font-medium transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer",
-        variants[variant],
-        sizes[size],
+        "inline-flex items-center justify-center gap-2 font-medium lx-pill transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none",
+        variantClass[variant],
+        sizeClass[size],
         className
       )}
-    >
-      {children}
-    </button>
+      {...props}
+    />
   );
 }

@@ -1,7 +1,7 @@
 import { requireSeller } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { SellerShell } from "@/components/SellerNav";
-import { ProductList } from "@/components/SellerForms";
+import { ProductTable } from "@/components/SellerForms";
 
 export const metadata = { title: "Seller Products" };
 
@@ -15,7 +15,7 @@ export default async function SellerProductsPage() {
 
   return (
     <SellerShell current="/seller/products" title="Products">
-      <ProductList products={products} />
+      <ProductTable products={products} />
     </SellerShell>
   );
 }

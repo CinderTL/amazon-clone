@@ -8,7 +8,7 @@ function NoImageArt({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-b from-[#f3f4f4] to-[#e8eaea] text-mh-muted",
+        "absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-b from-[#f3f4f4] to-[#e8eaea] text-[var(--text-muted)]",
         className
       )}
       role="img"
@@ -69,7 +69,7 @@ function ProductImageInner({
   const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
 
   return (
-    <div className={cn("relative overflow-hidden bg-mh-soft", className)}>
+    <div className={cn("relative overflow-hidden bg-[var(--bg-page)]", className)}>
       {status === "loading" && (
         <div className="absolute inset-0 shimmer z-[1]" aria-hidden />
       )}
@@ -102,7 +102,7 @@ export function ProductImage(props: ProductImageProps) {
   const trimmed = props.src?.trim();
   if (!trimmed) {
     return (
-      <div className={cn("relative overflow-hidden bg-mh-soft", props.className)}>
+      <div className={cn("relative overflow-hidden bg-[var(--bg-page)]", props.className)}>
         <NoImageArt />
       </div>
     );

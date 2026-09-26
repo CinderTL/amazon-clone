@@ -1,29 +1,12 @@
 "use client";
 
-import { useActionState, useTransition } from "react";
-import { useFormStatus } from "react-dom";
+import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import {
-  upsertProductAction,
-  deleteProductAction,
-  updateStockAction,
-  updateOrderStatusAction,
-  updateStoreProfileAction,
-  type ActionState,
-} from "@/lib/actions";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { Input, Label, Textarea, Select, FormError, FormSuccess } from "@/components/ui/Form";
+import { Input, Label, Textarea, Select } from "@/components/ui/Form";
 import { formatPrice } from "@/lib/utils";
-
-function Submit({ label }: { label: string }) {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" variant="cta" disabled={pending}>
-      {pending ? "Saving…" : label}
-    </Button>
-  );
-}
+import { ProductImage } from "@/components/ProductImage";
 
 export function ProductForm({
   categories,
@@ -44,11 +27,46 @@ export function ProductForm({
     featured: boolean;
   };
 }) {
-  const [state, action] = useActionState(upsertProductAction, {} as ActionState);
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    const form = new FormData(e.currentTarget);
+    const payload = {
+      name: String(form.get("name")),
+      description: String(form.get("description")),
+      price: Number(form.get("price")),
+      compareAt: form.get("compareAt") ? Number(form.get("compareAt")) : null,
+      stock: Number(form.get("stock")),
+      categoryId: String(form.get("categoryId")),
+      brand: String(form.get("brand") || "") || undefined,
+      imageUrl: String(form.get("imageUrl")),
+      featured: form.get("featured") === "on",
+      active: form.get("active") !== "off",
+    };
+
+    const res = await fetch(product ? `/api/seller/products/${product.id}` : "/api/seller/products", {
+      method: product ? "PATCH" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    setLoading(false);
+    if (!res.ok) {
+      setError(data.error || "Save failed");
+      return;
+    }
+    router.push("/seller/products");
+    router.refresh();
+  }
 
   return (
-    <form action={action} className="bg-white border border-mh-border rounded-lg p-4 space-y-3 max-w-2xl">
-      {product && <input type="hidden" name="id" value={product.id} />}
+    <form onSubmit={onSubmit} className="lx-card p-5 space-y-3 max-w-2xl">
+      {error && <p className="text-sm text-[var(--coral)]">{error}</p>}
       <div>
         <Label htmlFor="name">Product name</Label>
         <Input id="name" name="name" defaultValue={product?.name} required />
@@ -97,95 +115,81 @@ export function ProductForm({
           required
         />
       </div>
-      <div className="flex gap-4">
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="active" defaultChecked={product?.active ?? true} />
-          Active
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="featured" defaultChecked={product?.featured ?? false} />
-          Featured
-        </label>
-      </div>
-      <FormError message={state.error} />
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="featured" defaultChecked={product?.featured} /> Featured
+      </label>
       <div className="flex gap-2">
-        <Submit label={product ? "Update product" : "Create product"} />
-        <Link href="/seller/products" className="inline-flex items-center text-sm text-mh-link hover:underline px-3">
-          Cancel
+        <Button type="submit" disabled={loading}>
+          {loading ? "Saving…" : "Save product"}
+        </Button>
+        <Link href="/seller/products">
+          <Button type="button" variant="secondary">
+            Cancel
+          </Button>
         </Link>
       </div>
     </form>
   );
 }
 
-export function ProductList({
+export function ProductTable({
   products,
 }: {
   products: {
     id: string;
     name: string;
-    slug: string;
+    imageUrl: string;
     price: number;
     stock: number;
     active: boolean;
-    imageUrl: string;
-    category: { name: string };
   }[];
 }) {
-  const [pending, startTransition] = useTransition();
+  const router = useRouter();
+
+  async function remove(id: string) {
+    if (!confirm("Delete this product?")) return;
+    await fetch(`/api/seller/products/${id}`, { method: "DELETE" });
+    router.refresh();
+  }
 
   return (
-    <div className="bg-white border border-mh-border rounded-lg overflow-hidden">
-      <div className="flex justify-between items-center p-4 border-b border-mh-border">
-        <h2 className="font-bold">Your products ({products.length})</h2>
-        <Link
-          href="/seller/products/new"
-          className="inline-flex h-9 px-4 items-center rounded-lg bg-gradient-to-b from-mh-cta-top to-mh-cta-bottom border border-mh-cta-border text-sm font-medium"
-        >
-          Add product
+    <div className="lx-card overflow-hidden">
+      <div className="flex justify-between items-center p-4 border-b border-[var(--border)]">
+        <h2 className="font-heading font-bold">Products</h2>
+        <Link href="/seller/products/new">
+          <Button size="sm">Add product</Button>
         </Link>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-mh-muted border-b border-mh-border bg-mh-soft">
+            <tr className="text-left text-[var(--text-muted)] border-b border-[var(--border)] bg-[var(--bg-page)]">
               <th className="p-3">Product</th>
-              <th className="p-3">Category</th>
               <th className="p-3">Price</th>
               <th className="p-3">Stock</th>
               <th className="p-3">Status</th>
-              <th className="p-3">Actions</th>
+              <th className="p-3"></th>
             </tr>
           </thead>
           <tbody>
             {products.map((p) => (
-              <tr key={p.id} className="border-b border-mh-border last:border-0">
+              <tr key={p.id} className="border-b border-[var(--border)] last:border-0">
                 <td className="p-3">
-                  <div className="flex items-center gap-2">
-                    <div className="relative w-10 h-10 rounded overflow-hidden bg-mh-soft shrink-0">
-                      <Image src={p.imageUrl} alt="" fill className="object-cover" sizes="40px" />
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0">
+                      <ProductImage src={p.imageUrl} alt="" className="absolute inset-0" sizes="40px" />
                     </div>
-                    <span className="line-clamp-2">{p.name}</span>
+                    <span className="font-medium">{p.name}</span>
                   </div>
                 </td>
-                <td className="p-3">{p.category.name}</td>
                 <td className="p-3">{formatPrice(p.price)}</td>
                 <td className="p-3">{p.stock}</td>
                 <td className="p-3">{p.active ? "Active" : "Hidden"}</td>
-                <td className="p-3 space-x-2 whitespace-nowrap">
-                  <Link href={`/seller/products/${p.id}/edit`} className="text-mh-link hover:underline">
+                <td className="p-3 text-right space-x-2">
+                  <Link href={`/seller/products/${p.id}/edit`} className="text-[var(--sky)]">
                     Edit
                   </Link>
-                  <button
-                    type="button"
-                    disabled={pending}
-                    className="text-mh-danger hover:underline"
-                    onClick={() => {
-                      if (confirm("Delete this product?")) {
-                        startTransition(() => deleteProductAction(p.id));
-                      }
-                    }}
-                  >
+                  <button type="button" className="text-[var(--coral)]" onClick={() => remove(p.id)}>
                     Delete
                   </button>
                 </td>
@@ -193,8 +197,8 @@ export function ProductList({
             ))}
             {products.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-8 text-center text-mh-muted">
-                  No products yet. Create your first listing.
+                <td colSpan={5} className="p-8 text-center text-[var(--text-muted)]">
+                  No products yet.
                 </td>
               </tr>
             )}
@@ -205,50 +209,41 @@ export function ProductList({
   );
 }
 
-export function InventoryList({
+export function InventoryEditor({
   products,
 }: {
-  products: { id: string; name: string; stock: number; imageUrl: string }[];
+  products: { id: string; name: string; imageUrl: string; stock: number }[];
 }) {
-  const [pending, startTransition] = useTransition();
-
+  const router = useRouter();
   return (
-    <div className="bg-white border border-mh-border rounded-lg divide-y divide-mh-border">
+    <div className="lx-card divide-y divide-[var(--border)]">
       {products.map((p) => (
-        <div key={p.id} className="flex items-center gap-3 p-3">
-          <div className="relative w-12 h-12 rounded overflow-hidden bg-mh-soft shrink-0">
-            <Image src={p.imageUrl} alt="" fill className="object-cover" sizes="48px" />
+        <div key={p.id} className="p-4 flex items-center gap-4">
+          <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0">
+            <ProductImage src={p.imageUrl} alt="" className="absolute inset-0" sizes="48px" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{p.name}</p>
+            <p className="font-medium truncate">{p.name}</p>
           </div>
-          <input
+          <Input
             type="number"
-            min={0}
+            className="w-24"
             defaultValue={p.stock}
-            disabled={pending}
-            className="w-24 h-9 border border-mh-input rounded-md px-2"
-            onBlur={(e) => {
-              const stock = parseInt(e.target.value, 10);
-              if (!Number.isNaN(stock) && stock !== p.stock) {
-                startTransition(() => updateStockAction(p.id, stock));
-              }
+            onBlur={async (e) => {
+              await fetch(`/api/seller/products/${p.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ stock: Number(e.target.value) }),
+              });
+              router.refresh();
             }}
           />
         </div>
       ))}
-      {products.length === 0 && <p className="p-6 text-center text-mh-muted">No products</p>}
+      {products.length === 0 && <p className="p-6 text-center text-[var(--text-muted)]">No products</p>}
     </div>
   );
 }
-
-type OrderStatusValue =
-  | "PENDING"
-  | "CONFIRMED"
-  | "PROCESSING"
-  | "SHIPPED"
-  | "DELIVERED"
-  | "CANCELLED";
 
 export function SellerOrdersList({
   orders,
@@ -256,69 +251,55 @@ export function SellerOrdersList({
   orders: {
     id: string;
     orderNumber: string;
-    status: OrderStatusValue;
-    createdAt: Date;
-    shippingName: string;
-    items: { id: string; name: string; quantity: number; price: number }[];
-    sellerTotal: number;
+    status: string;
+    createdAt: string | Date;
+    user: { name: string; email: string };
+    items: { name: string; quantity: number; price: number }[];
   }[];
 }) {
-  const [pending, startTransition] = useTransition();
-  const statuses: OrderStatusValue[] = [
-    "PENDING",
-    "CONFIRMED",
-    "PROCESSING",
-    "SHIPPED",
-    "DELIVERED",
-    "CANCELLED",
-  ];
+  const router = useRouter();
+  const statuses = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
 
   return (
     <div className="space-y-3">
       {orders.map((o) => (
-        <div key={o.id} className="bg-white border border-mh-border rounded-lg p-4">
-          <div className="flex flex-wrap justify-between gap-2 mb-2">
+        <div key={o.id} className="lx-card p-4">
+          <div className="flex flex-wrap justify-between gap-3">
             <div>
               <p className="font-bold">{o.orderNumber}</p>
-              <p className="text-xs text-mh-muted">
-                {o.shippingName} · {new Date(o.createdAt).toLocaleDateString()}
+              <p className="text-xs text-[var(--text-muted)]">
+                {o.user.name} · {new Date(o.createdAt).toLocaleDateString()}
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <select
-                defaultValue={o.status}
-                disabled={pending}
-                className="h-8 border border-mh-border rounded-md px-2 text-sm"
-                onChange={(e) => {
-                  const status = e.target.value as OrderStatusValue;
-                  startTransition(async () => {
-                    await updateOrderStatusAction(o.id, status as Parameters<typeof updateOrderStatusAction>[1]);
-                  });
-                }}
-              >
-                {statuses.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-              <span className="font-bold text-sm">{formatPrice(o.sellerTotal)}</span>
-            </div>
+            <Select
+              className="w-40"
+              defaultValue={o.status}
+              onChange={async (e) => {
+                await fetch("/api/seller/orders", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ orderId: o.id, status: e.target.value }),
+                });
+                router.refresh();
+              }}
+            >
+              {statuses.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </Select>
           </div>
-          <ul className="text-sm text-mh-muted space-y-1">
-            {o.items.map((i) => (
-              <li key={i.id}>
-                {i.quantity}× {i.name} — {formatPrice(i.price * i.quantity)}
+          <ul className="text-sm text-[var(--text-muted)] mt-3 space-y-1">
+            {o.items.map((item, idx) => (
+              <li key={idx}>
+                {item.name} × {item.quantity} — {formatPrice(item.price * item.quantity)}
               </li>
             ))}
           </ul>
         </div>
       ))}
-      {orders.length === 0 && (
-        <div className="bg-white border border-mh-border rounded-lg p-8 text-center text-mh-muted">
-          No orders for your products yet.
-        </div>
-      )}
+      {orders.length === 0 && <div className="lx-card p-8 text-center text-[var(--text-muted)]">No orders yet.</div>}
     </div>
   );
 }
@@ -326,40 +307,49 @@ export function SellerOrdersList({
 export function StoreProfileForm({
   store,
 }: {
-  store: {
-    storeName: string;
-    description: string | null;
-    logoUrl: string | null;
-    bannerUrl: string | null;
-    slug: string;
-  };
+  store: { storeName: string; slug: string; description: string | null; logoUrl: string | null; bannerUrl: string | null };
 }) {
-  const [state, action] = useActionState(updateStoreProfileAction, {} as ActionState);
+  const router = useRouter();
+  const [message, setMessage] = useState("");
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const res = await fetch("/api/seller/store", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        storeName: form.get("storeName"),
+        description: form.get("description") || null,
+        logoUrl: form.get("logoUrl") || null,
+        bannerUrl: form.get("bannerUrl") || null,
+      }),
+    });
+    setMessage(res.ok ? "Saved" : "Failed");
+    router.refresh();
+  }
+
   return (
-    <form action={action} className="bg-white border border-mh-border rounded-lg p-4 space-y-3 max-w-xl">
+    <form onSubmit={onSubmit} className="lx-card p-5 space-y-3 max-w-xl">
       <div>
-        <Label htmlFor="storeName">Store name</Label>
-        <Input id="storeName" name="storeName" defaultValue={store.storeName} required />
+        <Label>Store name</Label>
+        <Input name="storeName" defaultValue={store.storeName} required />
+        <p className="text-sm text-[var(--text-muted)] mt-1">/store/{store.slug}</p>
       </div>
       <div>
-        <Label>Store URL slug</Label>
-        <p className="text-sm text-mh-muted">/store/{store.slug}</p>
+        <Label>Description</Label>
+        <Textarea name="description" defaultValue={store.description || ""} />
       </div>
       <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea id="description" name="description" defaultValue={store.description ?? ""} />
+        <Label>Logo URL</Label>
+        <Input name="logoUrl" defaultValue={store.logoUrl || ""} />
       </div>
       <div>
-        <Label htmlFor="logoUrl">Logo URL</Label>
-        <Input id="logoUrl" name="logoUrl" defaultValue={store.logoUrl ?? ""} />
+        <Label>Banner URL</Label>
+        <Input name="bannerUrl" defaultValue={store.bannerUrl || ""} />
       </div>
-      <div>
-        <Label htmlFor="bannerUrl">Banner URL</Label>
-        <Input id="bannerUrl" name="bannerUrl" defaultValue={store.bannerUrl ?? ""} />
-      </div>
-      <FormError message={state.error} />
-      <FormSuccess message={state.success} />
-      <Submit label="Save store profile" />
+      {message && <p className="text-sm text-[var(--mint)]">{message}</p>}
+      <Button type="submit">Save store</Button>
     </form>
   );
 }

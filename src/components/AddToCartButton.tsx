@@ -1,66 +1,95 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { addToCartAction } from "@/lib/actions";
 
 export function AddToCartButton({
   productId,
-  stock,
-  variant = "cta",
+  variants = [],
+  disabled,
 }: {
   productId: string;
-  stock: number;
-  variant?: "cta" | "buy";
+  variants?: { id: string; name: string; stock: number; priceDelta: number }[];
+  disabled?: boolean;
 }) {
-  const [qty, setQty] = useState(1);
-  const [message, setMessage] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const router = useRouter();
+  const [variantId, setVariantId] = useState(variants[0]?.id || "");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
-  if (stock < 1) {
-    return <p className="text-mh-danger font-medium">Currently unavailable</p>;
+  async function add() {
+    setLoading(true);
+    setMessage("");
+    const res = await fetch("/api/cart", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        productId,
+        quantity: 1,
+        variantId: variantId || null,
+      }),
+    });
+    const data = await res.json();
+    setLoading(false);
+    if (!res.ok) {
+      if (res.status === 401) {
+        router.push(`/login?next=/product`);
+        return;
+      }
+      setMessage(data.error || "Could not add to cart");
+      return;
+    }
+    setMessage("Added to cart");
+    router.refresh();
+  }
+
+  async function wishlist() {
+    setLoading(true);
+    const res = await fetch("/api/wishlist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId }),
+    });
+    setLoading(false);
+    if (res.status === 401) {
+      router.push("/login");
+      return;
+    }
+    setMessage(res.ok ? "Saved to wishlist" : "Could not save");
+    router.refresh();
   }
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <label htmlFor={`qty-${productId}`} className="text-sm">
-          Qty:
-        </label>
-        <select
-          id={`qty-${productId}`}
-          value={qty}
-          onChange={(e) => setQty(Number(e.target.value))}
-          className="h-8 border border-mh-border rounded-md px-2 bg-mh-soft"
-        >
-          {Array.from({ length: Math.min(stock, 10) }, (_, i) => i + 1).map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
+      {variants.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {variants.map((v) => (
+            <button
+              key={v.id}
+              type="button"
+              disabled={v.stock < 1}
+              onClick={() => setVariantId(v.id)}
+              className={`lx-pill px-3 py-1.5 text-sm border transition ${
+                variantId === v.id
+                  ? "border-[var(--sky)] bg-[var(--sky-soft)]"
+                  : "border-[var(--border)] hover:border-[var(--sky)]"
+              } disabled:opacity-40`}
+            >
+              {v.name}
+            </button>
           ))}
-        </select>
-      </div>
-      <Button
-        variant={variant}
-        size="lg"
-        className="w-full"
-        disabled={pending}
-        onClick={() => {
-          setMessage(null);
-          startTransition(async () => {
-            const res = await addToCartAction(productId, qty);
-            if (res.error) setMessage(res.error);
-            else setMessage(res.success || "Added!");
-          });
-        }}
-      >
-        {pending ? "Adding…" : variant === "buy" ? "Buy Now" : "Add to Cart"}
-      </Button>
-      {message && (
-        <p className={`text-sm ${message.includes("sign in") || message.includes("stock") || message.includes("found") ? "text-mh-danger" : "text-mh-stock"}`}>
-          {message}
-        </p>
+        </div>
       )}
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={add} disabled={disabled || loading} variant="coral" size="lg">
+          {loading ? "Adding…" : "Add to cart"}
+        </Button>
+        <Button onClick={wishlist} disabled={loading} variant="secondary" size="lg">
+          Wishlist
+        </Button>
+      </div>
+      {message && <p className="text-sm text-[var(--mint)]">{message}</p>}
     </div>
   );
 }

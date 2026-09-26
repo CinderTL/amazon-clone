@@ -1,110 +1,126 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { useFormStatus } from "react-dom";
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { loginAction, registerAction, type ActionState } from "@/lib/actions";
+import { Input, Label } from "@/components/ui/Form";
 import { Button } from "@/components/ui/Button";
-import { Input, Label, FormError } from "@/components/ui/Form";
 
-function Submit({ label }: { label: string }) {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" variant="cta" size="lg" className="w-full" disabled={pending}>
-      {pending ? "Please wait…" : label}
-    </Button>
-  );
-}
+export function LoginForm() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const next = params.get("next") || "/";
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-export function LoginForm({ next = "/" }: { next?: string }) {
-  const [state, action] = useActionState(loginAction, {} as ActionState);
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    const form = new FormData(e.currentTarget);
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: form.get("email"),
+        password: form.get("password"),
+      }),
+    });
+    const data = await res.json();
+    setLoading(false);
+    if (!res.ok) {
+      setError(data.error || "Login failed");
+      return;
+    }
+    router.push(next);
+    router.refresh();
+  }
+
   return (
-    <form action={action} className="space-y-4">
-      <input type="hidden" name="next" value={next} />
+    <form onSubmit={onSubmit} className="space-y-4">
+      {error && <p className="text-sm text-[var(--coral)]">{error}</p>}
       <div>
         <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" required autoComplete="email" />
+        <Input id="email" name="email" type="email" required defaultValue="customer@example.com" />
       </div>
       <div>
         <Label htmlFor="password">Password</Label>
-        <Input id="password" name="password" type="password" required autoComplete="current-password" />
+        <Input id="password" name="password" type="password" required defaultValue="password123" />
       </div>
-      <FormError message={state.error} />
-      <Submit label="Sign in" />
-      <p className="text-sm text-mh-muted text-center">
-        New to Lixazon?{" "}
-        <Link href="/register" className="text-mh-link hover:underline">
-          Create an account
-        </Link>
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? "Signing in…" : "Sign in"}
+      </Button>
+      <p className="text-sm text-[var(--text-muted)] text-center">
+        New here? <Link href="/register" className="text-[var(--sky)] font-medium">Create an account</Link>
       </p>
     </form>
   );
 }
 
-export function RegisterForm({ defaultRole = "CUSTOMER" }: { defaultRole?: string }) {
-  const [state, action] = useActionState(registerAction, {} as ActionState);
-  const [role, setRole] = useState(defaultRole);
+export function RegisterForm() {
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState<"CUSTOMER" | "SELLER">("CUSTOMER");
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    const form = new FormData(e.currentTarget);
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: form.get("name"),
+        email: form.get("email"),
+        password: form.get("password"),
+        role,
+        storeName: form.get("storeName") || undefined,
+      }),
+    });
+    const data = await res.json();
+    setLoading(false);
+    if (!res.ok) {
+      setError(data.error || "Registration failed");
+      return;
+    }
+    router.push(role === "SELLER" ? "/seller/dashboard" : "/");
+    router.refresh();
+  }
 
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4">
+      {error && <p className="text-sm text-[var(--coral)]">{error}</p>}
       <div>
-        <Label htmlFor="name">Your name</Label>
-        <Input id="name" name="name" required autoComplete="name" />
+        <Label htmlFor="name">Name</Label>
+        <Input id="name" name="name" required />
       </div>
       <div>
         <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" required autoComplete="email" />
+        <Input id="email" name="email" type="email" required />
       </div>
       <div>
         <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          required
-          minLength={6}
-          autoComplete="new-password"
-        />
+        <Input id="password" name="password" type="password" minLength={8} required />
       </div>
-      <div>
-        <Label>Account type</Label>
-        <div className="flex gap-4 mt-1">
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="radio"
-              name="role"
-              value="CUSTOMER"
-              checked={role === "CUSTOMER"}
-              onChange={() => setRole("CUSTOMER")}
-            />
-            Customer
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="radio"
-              name="role"
-              value="SELLER"
-              checked={role === "SELLER"}
-              onChange={() => setRole("SELLER")}
-            />
-            Seller
-          </label>
-        </div>
+      <div className="flex gap-2">
+        <Button type="button" variant={role === "CUSTOMER" ? "sky" : "secondary"} onClick={() => setRole("CUSTOMER")}>
+          Buyer
+        </Button>
+        <Button type="button" variant={role === "SELLER" ? "mint" : "secondary"} onClick={() => setRole("SELLER")}>
+          Seller
+        </Button>
       </div>
       {role === "SELLER" && (
         <div>
           <Label htmlFor="storeName">Store name</Label>
-          <Input id="storeName" name="storeName" required placeholder="Your store name" />
+          <Input id="storeName" name="storeName" required />
         </div>
       )}
-      <FormError message={state.error} />
-      <Submit label="Create account" />
-      <p className="text-sm text-mh-muted text-center">
-        Already have an account?{" "}
-        <Link href="/login" className="text-mh-link hover:underline">
-          Sign in
-        </Link>
-      </p>
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? "Creating…" : "Create account"}
+      </Button>
     </form>
   );
 }

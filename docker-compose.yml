@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: lixazon-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lixazon
+      POSTGRES_PASSWORD: lixazon
+      POSTGRES_DB: lixazon
+    ports:
+      - "5433:5432"
+    volumes:
+      - lixazon_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lixazon -d lixazon"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  lixazon_pg_data:

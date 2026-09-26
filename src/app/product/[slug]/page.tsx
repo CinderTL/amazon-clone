@@ -1,145 +1,137 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
+import Link from "next/link";
+import { getProductBySlug } from "@/services/catalog";
 import { formatPrice, parseImages } from "@/lib/utils";
 import { StarRating } from "@/components/ui/StarRating";
-import { AddToCartButton } from "@/components/AddToCartButton";
-import { ProductGrid } from "@/components/ProductCard";
 import { ProductImage } from "@/components/ProductImage";
+import { ProductGrid } from "@/components/ProductCard";
+import { AddToCartButton } from "@/components/AddToCartButton";
+import { ReviewForm } from "@/components/ReviewForm";
+import { prisma } from "@/lib/db";
+import { getSession } from "@/lib/auth";
 
-type Props = { params: Promise<{ slug: string }> };
+export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: Props) {
+export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = await prisma.product.findUnique({ where: { slug } });
-  return { title: product?.name || "Product" };
-}
-
-export default async function ProductPage({ params }: Props) {
-  const { slug } = await params;
-  const product = await prisma.product.findUnique({
-    where: { slug },
-    include: {
-      category: true,
-      seller: true,
-      reviews: { include: { user: { select: { name: true } } }, orderBy: { createdAt: "desc" }, take: 10 },
-    },
-  });
+  const product = await getProductBySlug(slug);
   if (!product || !product.active) notFound();
 
   const images = parseImages(product.images);
-  const gallery = images.length > 0 ? images : [product.imageUrl];
-
+  const gallery = images.length ? images : [product.imageUrl];
   const related = await prisma.product.findMany({
-    where: { categoryId: product.categoryId, active: true, id: { not: product.id } },
-    include: { seller: true, category: true },
-    take: 5,
+    where: { active: true, categoryId: product.categoryId, id: { not: product.id } },
+    take: 8,
+    include: { category: true, seller: true },
   });
 
-  return (
-    <div className="w-full px-3 md:px-4 py-4">
-      <nav className="text-xs text-mh-muted mb-4">
-        <Link href="/" className="text-mh-link hover:underline">
-          Home
-        </Link>
-        {" › "}
-        <Link href={`/category/${product.category.slug}`} className="text-mh-link hover:underline">
-          {product.category.name}
-        </Link>
-        {" › "}
-        <span className="line-clamp-1">{product.name}</span>
-      </nav>
+  const session = await getSession();
+  let canReview = false;
+  if (session) {
+    const purchased = await prisma.orderItem.findFirst({
+      where: {
+        productId: product.id,
+        order: { userId: session.userId, paymentStatus: "SUCCEEDED" },
+      },
+    });
+    canReview = Boolean(purchased);
+  }
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-white border border-mh-border rounded-lg p-4 md:p-6">
-        <div className="md:col-span-5">
-          <ProductImage
-            src={gallery[0]}
-            alt={product.name}
-            className="aspect-square rounded-lg"
-            priority
-            sizes="(max-width:768px) 100vw, 40vw"
-          />
+  return (
+    <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+      <div className="grid lg:grid-cols-2 gap-8">
+        <div className="lx-card p-4">
+          <div className="aspect-square rounded-2xl lx-module-sky relative overflow-hidden">
+            <ProductImage
+              src={gallery[0]}
+              alt={product.name}
+              className="absolute inset-0 p-8"
+              imageClassName="object-contain"
+              sizes="(max-width:1024px) 100vw, 50vw"
+            />
+          </div>
           {gallery.length > 1 && (
-            <div className="flex gap-2 mt-2 overflow-x-auto">
-              {gallery.map((src, i) => (
-                <ProductImage
-                  key={i}
-                  src={src}
-                  alt=""
-                  className="relative w-16 h-16 shrink-0 border border-mh-border rounded"
-                  sizes="64px"
-                />
+            <div className="mt-3 grid grid-cols-4 gap-2">
+              {gallery.slice(0, 4).map((src) => (
+                <div key={src} className="aspect-square rounded-xl overflow-hidden relative lx-module-mint">
+                  <ProductImage src={src} alt="" className="absolute inset-0 p-2" imageClassName="object-contain" sizes="120px" />
+                </div>
               ))}
             </div>
           )}
         </div>
 
-        <div className="md:col-span-4 space-y-3">
-          <h1 className="text-xl md:text-2xl font-normal leading-snug">{product.name}</h1>
-          {product.brand && <p className="text-sm text-mh-link">Brand: {product.brand}</p>}
-          <StarRating rating={product.rating} count={product.reviewCount} size="md" />
-          <hr className="border-mh-border" />
-          <div className="flex items-baseline gap-2">
-            <span className="text-xs text-mh-muted">Price:</span>
-            <span className="text-2xl font-medium">{formatPrice(product.price)}</span>
+        <div>
+          <p className="text-sm text-[var(--text-muted)]">
+            <Link href={`/category/${product.category.slug}`} className="text-[var(--sky)]">
+              {product.category.name}
+            </Link>
+            {product.brand ? ` · ${product.brand}` : ""}
+          </p>
+          <h1 className="font-heading text-3xl md:text-4xl font-extrabold mt-2">{product.name}</h1>
+          <div className="mt-3">
+            <StarRating rating={product.rating} count={product.reviewCount} size="md" />
+          </div>
+          <div className="mt-4 flex items-baseline gap-3">
+            <span className="text-3xl font-bold">{formatPrice(product.price)}</span>
             {product.compareAt && product.compareAt > product.price && (
-              <span className="text-sm text-mh-muted line-through">{formatPrice(product.compareAt)}</span>
+              <span className="text-[var(--text-muted)] line-through">{formatPrice(product.compareAt)}</span>
             )}
           </div>
-          <p className="text-sm leading-relaxed text-mh-text whitespace-pre-line">{product.description}</p>
-          <p className="text-sm text-mh-muted">
-            Sold by{" "}
-            <span className="text-mh-link">{product.seller.storeName}</span> and fulfilled by Lixazon.
+          <p className="mt-4 text-[var(--text-muted)] leading-relaxed">{product.description}</p>
+          <p className={`mt-3 text-sm font-medium ${product.stock > 0 ? "text-[var(--mint)]" : "text-[var(--coral)]"}`}>
+            {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
           </p>
-        </div>
-
-        <div className="md:col-span-3">
-          <div className="border border-mh-border rounded-lg p-4 space-y-3 sticky top-24">
-            <p className="text-2xl font-medium">{formatPrice(product.price)}</p>
-            <p className="text-sm">
-              {product.price >= 35 ? (
-                <span className="text-mh-stock font-medium">FREE delivery</span>
-              ) : (
-                <span>
-                  Delivery fee applies · FREE over $35
-                </span>
-              )}
-            </p>
-            {product.stock > 0 ? (
-              <p className="text-lg text-mh-stock font-medium">
-                In Stock{product.stock <= 10 ? ` — only ${product.stock} left` : ""}
-              </p>
-            ) : (
-              <p className="text-lg text-mh-danger font-medium">Out of Stock</p>
-            )}
-            <AddToCartButton productId={product.id} stock={product.stock} />
-            <AddToCartButton productId={product.id} stock={product.stock} variant="buy" />
+          <p className="text-sm text-[var(--text-muted)] mt-1">Sold by {product.seller.storeName}</p>
+          <div className="mt-6">
+            <AddToCartButton
+              productId={product.id}
+              variants={product.variants.map((v) => ({
+                id: v.id,
+                name: v.name,
+                stock: v.stock,
+                priceDelta: v.priceDelta,
+              }))}
+              disabled={product.stock < 1}
+            />
           </div>
         </div>
       </div>
 
-      {product.reviews.length > 0 && (
-        <section className="mt-6 bg-white border border-mh-border rounded-lg p-4 md:p-6">
-          <h2 className="text-xl font-bold mb-4">Customer reviews</h2>
-          <div className="space-y-4">
+      <section className="mt-12">
+        <h2 className="font-heading text-2xl font-bold mb-4">Reviews</h2>
+        <div className="grid lg:grid-cols-[1fr_320px] gap-6">
+          <div className="space-y-3">
+            {product.reviews.length === 0 && (
+              <div className="lx-card p-6 text-[var(--text-muted)]">No reviews yet.</div>
+            )}
             {product.reviews.map((r) => (
-              <div key={r.id} className="border-b border-mh-border pb-4 last:border-0">
-                <p className="font-medium text-sm">{r.user.name}</p>
-                <StarRating rating={r.rating} />
-                {r.title && <p className="font-medium mt-1">{r.title}</p>}
-                {r.body && <p className="text-sm text-mh-muted mt-1">{r.body}</p>}
+              <div key={r.id} className="lx-card p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-medium">{r.user.name}</p>
+                  <StarRating rating={r.rating} />
+                </div>
+                {r.title && <p className="font-semibold mt-1">{r.title}</p>}
+                {r.body && <p className="text-sm text-[var(--text-muted)] mt-1">{r.body}</p>}
               </div>
             ))}
           </div>
-        </section>
-      )}
+          <div>
+            {canReview ? (
+              <ReviewForm productId={product.id} />
+            ) : (
+              <div className="lx-card p-4 text-sm text-[var(--text-muted)]">
+                Purchase this product to leave a review.
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
 
-      {related.length > 0 && (
-        <section className="mt-6">
-          <h2 className="text-xl font-bold mb-3">Related products</h2>
-          <ProductGrid products={related} />
-        </section>
-      )}
+      <section className="mt-12">
+        <h2 className="font-heading text-2xl font-bold mb-4">Related products</h2>
+        <ProductGrid products={related} />
+      </section>
     </div>
   );
 }

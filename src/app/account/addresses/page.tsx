@@ -1,31 +1,20 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { AddressManager } from "@/components/AddressManager";
 
-export const metadata = { title: "Your Addresses" };
+export const dynamic = "force-dynamic";
 
 export default async function AddressesPage() {
-  const session = await getSession();
-  if (!session) redirect("/login?next=/account/addresses");
-
+  const session = await requireAuth();
   const addresses = await prisma.address.findMany({
     where: { userId: session.userId },
     orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
   });
 
   return (
-    <div className="w-full px-4 py-6">
-      <nav className="text-xs text-mh-muted mb-3">
-        <Link href="/account" className="text-mh-link hover:underline">
-          Your Account
-        </Link>
-        {" › "}
-        <span>Your Addresses</span>
-      </nav>
-      <h1 className="text-2xl font-bold mb-4">Your Addresses</h1>
-      <AddressManager addresses={addresses} />
+    <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
+      <h1 className="font-heading text-3xl font-extrabold mb-6">Addresses</h1>
+      <AddressManager initial={addresses} />
     </div>
   );
 }

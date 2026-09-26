@@ -27,7 +27,8 @@ export function slugify(text: string) {
     .replace(/(^-|-$)/g, "");
 }
 
-export function parseImages(images: string): string[] {
+export function parseImages(images: string | string[]): string[] {
+  if (Array.isArray(images)) return images;
   try {
     const parsed = JSON.parse(images);
     return Array.isArray(parsed) ? parsed : [];

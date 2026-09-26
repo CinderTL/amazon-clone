@@ -3,53 +3,49 @@ import type { Product, Category, SellerProfile } from "@prisma/client";
 import { formatPrice } from "@/lib/utils";
 import { StarRating } from "@/components/ui/StarRating";
 import { ProductImage } from "@/components/ProductImage";
+import { Badge } from "@/components/ui/Badge";
 
 type ProductWithRelations = Product & {
-  category?: Category;
-  seller?: SellerProfile;
+  category?: Category | null;
+  seller?: Pick<SellerProfile, "storeName" | "slug"> | SellerProfile | null;
 };
 
-export function ProductCard({ product }: { product: ProductWithRelations }) {
+const softByIndex = ["var(--coral-soft)", "var(--sky-soft)", "var(--mint-soft)", "var(--mustard-soft)"];
+
+export function ProductCard({ product, tintIndex = 0 }: { product: ProductWithRelations; tintIndex?: number }) {
+  const discount =
+    product.compareAt && product.compareAt > product.price
+      ? Math.round(((product.compareAt - product.price) / product.compareAt) * 100)
+      : null;
+
   return (
-    <Link
-      href={`/product/${product.slug}`}
-      className="group flex flex-col bg-white border border-mh-border rounded-lg overflow-hidden hover:shadow-md transition-shadow h-full w-full min-w-0"
-    >
-      <div className="relative aspect-square">
+    <Link href={`/product/${product.slug}`} className="group lx-card flex flex-col overflow-hidden h-full w-full min-w-0">
+      <div className="relative aspect-square" style={{ background: softByIndex[tintIndex % softByIndex.length] }}>
         <ProductImage
           src={product.imageUrl}
           alt={product.name}
-          className="absolute inset-0"
-          imageClassName="group-hover:scale-[1.02] transition-transform"
+          className="absolute inset-0 p-4"
+          imageClassName="group-hover:scale-[1.03] transition-transform duration-200 object-contain"
           sizes="(max-width:768px) 50vw, 20vw"
         />
-        {product.compareAt && product.compareAt > product.price && (
-          <span className="absolute top-2 left-2 z-10 bg-mh-danger text-white text-[11px] font-semibold px-1.5 py-0.5 rounded">
-            Deal
+        {discount != null && (
+          <span className="absolute top-3 left-3 z-10">
+            <Badge tone="coral">-{discount}%</Badge>
           </span>
         )}
       </div>
-      <div className="p-3 flex flex-col gap-1.5 flex-1">
-        <h3 className="text-sm text-mh-text line-clamp-2 group-hover:text-mh-link-hover leading-snug">
-          {product.name}
-        </h3>
+      <div className="p-3 flex flex-col gap-1 flex-1">
+        <h3 className="text-sm font-medium text-[var(--text)] line-clamp-2 leading-snug">{product.name}</h3>
         <StarRating rating={product.rating} count={product.reviewCount} />
-        <div className="mt-auto pt-1">
-          <div className="flex items-baseline gap-2">
-            <span className="text-lg font-medium">{formatPrice(product.price)}</span>
-            {product.compareAt && product.compareAt > product.price && (
-              <span className="text-xs text-mh-muted line-through">{formatPrice(product.compareAt)}</span>
-            )}
-          </div>
-          {product.stock > 0 ? (
-            <p className="text-xs text-mh-stock mt-0.5">In Stock</p>
-          ) : (
-            <p className="text-xs text-mh-danger mt-0.5">Out of Stock</p>
-          )}
-          {product.seller && (
-            <p className="text-xs text-mh-muted mt-0.5">Sold by {product.seller.storeName}</p>
+        <div className="mt-auto pt-1 flex items-baseline gap-2">
+          <span className="text-base font-bold">{formatPrice(product.price)}</span>
+          {product.compareAt && product.compareAt > product.price && (
+            <span className="text-xs text-[var(--text-muted)] line-through">{formatPrice(product.compareAt)}</span>
           )}
         </div>
+        <p className={`text-[11px] ${product.stock > 0 ? "text-[var(--mint)]" : "text-[var(--coral)]"}`}>
+          {product.stock > 0 ? "In stock" : "Out of stock"}
+        </p>
       </div>
     </Link>
   );
@@ -58,15 +54,15 @@ export function ProductCard({ product }: { product: ProductWithRelations }) {
 export function ProductGrid({ products }: { products: ProductWithRelations[] }) {
   if (products.length === 0) {
     return (
-      <div className="bg-white border border-mh-border rounded-lg p-10 text-center text-mh-muted w-full">
+      <div className="lx-card p-10 text-center text-[var(--text-muted)] w-full">
         No products found. Try adjusting your filters.
       </div>
     );
   }
   return (
-    <div className="w-full grid gap-3 grid-cols-[repeat(auto-fit,minmax(180px,1fr))]">
-      {products.map((p) => (
-        <ProductCard key={p.id} product={p} />
+    <div className="w-full grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {products.map((p, i) => (
+        <ProductCard key={p.id} product={p} tintIndex={i} />
       ))}
     </div>
   );

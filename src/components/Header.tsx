@@ -1,18 +1,14 @@
 import Link from "next/link";
-import { Search, ShoppingCart, MapPin, Menu, User } from "lucide-react";
+import { Search, ShoppingCart, User, Heart } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { logoutAction } from "@/lib/actions";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LogoutButton } from "@/components/LogoutButton";
+import { NAV_CATEGORIES } from "@/lib/nav-categories";
 
 export async function Header() {
   const session = await getSession();
   let cartCount = 0;
-  let categories: { name: string; slug: string }[] = [];
-
-  categories = await prisma.category.findMany({
-    orderBy: { name: "asc" },
-    select: { name: true, slug: true },
-  });
 
   if (session) {
     const cart = await prisma.cart.findUnique({
@@ -23,118 +19,95 @@ export async function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50">
-      <div className="bg-mh-navy text-white">
-        <div className="w-full px-3 md:px-4 flex items-center gap-2 md:gap-3 py-2">
-          <Link href="/" className="flex items-center gap-1.5 px-2 py-1 rounded hover:outline hover:outline-1 hover:outline-white shrink-0">
-            <span className="text-xl font-bold tracking-tight">
-              Lixa<span className="text-mh-brand">zon</span>
-            </span>
+    <header className="sticky top-0 z-50 w-full bg-[var(--bg)]/95 backdrop-blur-md border-b border-[var(--border)]">
+      <div className="w-full px-4 md:px-8 lg:px-12">
+        <div className="flex items-center gap-3 py-3">
+          <Link href="/" className="shrink-0 font-heading text-2xl font-extrabold tracking-tight">
+            Lixa<span className="text-[var(--coral)]">zon</span>
           </Link>
-
-          <div className="hidden md:flex items-center gap-1 px-2 py-1 rounded hover:outline hover:outline-1 hover:outline-white text-xs shrink-0">
-            <MapPin className="h-4 w-4" />
-            <div>
-              <div className="text-[11px] text-gray-300">Deliver to</div>
-              <div className="font-bold">United States</div>
-            </div>
-          </div>
 
           <form action="/search" method="get" className="flex-1 flex min-w-0">
-            <select
-              name="category"
-              className="hidden sm:block h-10 rounded-l-md border-0 bg-[#f3f3f3] text-mh-text text-xs px-2 max-w-[120px]"
-              defaultValue=""
-            >
-              <option value="">All</option>
-              {categories.map((c) => (
-                <option key={c.slug} value={c.slug}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-            <input
-              type="search"
-              name="q"
-              placeholder="Search Lixazon"
-              className="flex-1 h-10 px-3 text-mh-text bg-white outline-none min-w-0"
-            />
-            <button
-              type="submit"
-              className="h-10 w-11 rounded-r-md bg-mh-brand text-mh-navy flex items-center justify-center hover:bg-[#f3a847]"
-              aria-label="Search"
-            >
-              <Search className="h-5 w-5" />
-            </button>
+            <div className="flex w-full items-center lx-pill border border-[var(--border)] bg-[var(--surface)] overflow-hidden focus-within:ring-2 focus-within:ring-[var(--ring)]">
+              <input
+                type="search"
+                name="q"
+                placeholder="Search products, brands, categories…"
+                className="flex-1 h-11 px-4 bg-transparent outline-none text-[var(--text)] min-w-0"
+              />
+              <button
+                type="submit"
+                className="h-11 w-12 flex items-center justify-center text-[var(--sky)] hover:bg-[var(--sky-soft)] transition"
+                aria-label="Search"
+              >
+                <Search className="h-5 w-5" />
+              </button>
+            </div>
           </form>
 
-          <div className="hidden lg:flex flex-col px-2 py-1 rounded hover:outline hover:outline-1 hover:outline-white text-xs">
-            <span className="text-gray-300">EN</span>
-            <span className="font-bold">USD</span>
-          </div>
-
-          {session ? (
-            <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
+            <ThemeToggle />
+            {session && (
               <Link
-                href={session.role === "SELLER" ? "/seller/dashboard" : "/account"}
-                className="hidden sm:flex flex-col px-2 py-1 rounded hover:outline hover:outline-1 hover:outline-white text-xs"
+                href="/account/wishlist"
+                className="h-10 w-10 rounded-full flex items-center justify-center hover:bg-[var(--bg-page)]"
+                aria-label="Wishlist"
               >
-                <span className="text-gray-300">Hello, {session.name.split(" ")[0]}</span>
-                <span className="font-bold">
-                  {session.role === "SELLER" ? "Seller Central" : "Account & Lists"}
-                </span>
+                <Heart className="h-5 w-5" />
               </Link>
-              <form action={logoutAction}>
-                <button type="submit" className="text-xs px-2 py-1 rounded hover:outline hover:outline-1 hover:outline-white">
-                  Sign out
-                </button>
-              </form>
-            </div>
-          ) : (
-            <Link href="/login" className="flex items-center gap-1 px-2 py-1 rounded hover:outline hover:outline-1 hover:outline-white text-xs">
-              <User className="h-4 w-4 sm:hidden" />
-              <div className="hidden sm:block">
-                <div className="text-gray-300">Hello, sign in</div>
-                <div className="font-bold">Account & Lists</div>
-              </div>
+            )}
+            <Link
+              href="/cart"
+              className="relative h-10 w-10 rounded-full flex items-center justify-center hover:bg-[var(--bg-page)]"
+              aria-label="Cart"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-5 h-5 px-1 rounded-full bg-[var(--coral)] text-white text-[10px] font-bold flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
             </Link>
-          )}
-
-          <Link href="/account/orders" className="hidden md:flex flex-col px-2 py-1 rounded hover:outline hover:outline-1 hover:outline-white text-xs">
-            <span className="text-gray-300">Returns</span>
-            <span className="font-bold">& Orders</span>
-          </Link>
-
-          <Link href="/cart" className="relative flex items-end gap-1 px-2 py-1 rounded hover:outline hover:outline-1 hover:outline-white">
-            <div className="relative">
-              <ShoppingCart className="h-7 w-7" />
-              <span className="absolute -top-1 left-3 text-mh-brand font-bold text-sm">{cartCount}</span>
-            </div>
-            <span className="hidden sm:inline font-bold text-sm pb-0.5">Cart</span>
-          </Link>
+            {session ? (
+              <div className="flex items-center gap-1">
+                <Link
+                  href={session.role === "SELLER" ? "/seller/dashboard" : "/account"}
+                  className="hidden sm:flex items-center gap-2 h-10 px-3 rounded-full hover:bg-[var(--bg-page)] text-sm font-medium"
+                >
+                  <User className="h-4 w-4" />
+                  {session.name.split(" ")[0]}
+                </Link>
+                <LogoutButton />
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="flex items-center gap-2 h-10 px-3 rounded-full hover:bg-[var(--bg-page)] text-sm font-medium"
+              >
+                <User className="h-4 w-4" />
+                <span className="hidden sm:inline">Sign in</span>
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
-      <nav className="bg-mh-navy-sub text-white">
-        <div className="w-full px-3 md:px-4 flex items-center gap-1 py-1.5 text-sm overflow-x-auto">
-          <Link href="/search" className="flex items-center gap-1 px-2 py-1 rounded hover:outline hover:outline-1 hover:outline-white shrink-0 font-bold">
-            <Menu className="h-4 w-4" /> All
-          </Link>
-          {categories.map((c) => (
-            <Link
-              key={c.slug}
-              href={`/category/${c.slug}`}
-              className="px-2 py-1 rounded hover:outline hover:outline-1 hover:outline-white whitespace-nowrap shrink-0"
-            >
-              {c.name}
-            </Link>
-          ))}
-          {session?.role === "SELLER" && (
-            <Link href="/seller/dashboard" className="px-2 py-1 rounded hover:outline hover:outline-1 hover:outline-white whitespace-nowrap shrink-0 text-mh-brand font-medium">
-              Seller Dashboard
-            </Link>
-          )}
-        </div>
+      <nav className="w-full border-t border-[var(--border)] bg-[var(--surface)]">
+        <ul className="w-full flex items-stretch overflow-x-auto scrollbar-none">
+          {NAV_CATEGORIES.map((c) => {
+            const Icon = c.icon;
+            return (
+              <li key={c.slug} className="flex-1 min-w-[7.5rem]">
+                <Link
+                  href={`/category/${c.slug}`}
+                  className="group flex items-center justify-center gap-2 h-12 px-3 text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--bg-page)] border-b-2 border-transparent hover:border-[var(--sky)] transition-colors"
+                >
+                  <Icon className="h-4 w-4 shrink-0 text-[var(--sky)] group-hover:scale-110 transition-transform duration-200" />
+                  <span className="whitespace-nowrap">{c.name}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
     </header>
   );
@@ -142,49 +115,44 @@ export async function Header() {
 
 export function Footer() {
   return (
-    <footer className="mt-auto">
-      <a href="#top" className="block bg-mh-navy-hover text-white text-center py-3 text-sm hover:bg-[#485769]">
-        Back to top
-      </a>
-      <div className="bg-mh-navy-sub text-white">
-        <div className="w-full px-6 md:px-10 grid grid-cols-2 md:grid-cols-4 gap-8 py-10 text-sm">
-          <div>
-            <h4 className="font-bold mb-2">Get to Know Us</h4>
-            <ul className="space-y-1.5 text-gray-300">
-              <li><Link href="/" className="hover:underline">About Lixazon</Link></li>
-              <li><Link href="/search" className="hover:underline">Careers</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold mb-2">Make Money with Us</h4>
-            <ul className="space-y-1.5 text-gray-300">
-              <li><Link href="/register?role=SELLER" className="hover:underline">Sell on Lixazon</Link></li>
-              <li><Link href="/seller/dashboard" className="hover:underline">Seller Central</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold mb-2">Let Us Help You</h4>
-            <ul className="space-y-1.5 text-gray-300">
-              <li><Link href="/account" className="hover:underline">Your Account</Link></li>
-              <li><Link href="/account/orders" className="hover:underline">Your Orders</Link></li>
-              <li><Link href="/cart" className="hover:underline">Shopping Cart</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold mb-2">Demo Accounts</h4>
-            <ul className="space-y-1.5 text-gray-300 text-xs">
-              <li>customer@example.com</li>
-              <li>seller@example.com</li>
-              <li>password: password123</li>
-            </ul>
-          </div>
+    <footer className="w-full mt-0 border-t border-[var(--border)] bg-[var(--surface)]">
+      <div className="w-full px-4 md:px-8 lg:px-12 py-10 grid gap-8 sm:grid-cols-3">
+        <div>
+          <p className="font-heading text-xl font-extrabold">
+            Lixa<span className="text-[var(--coral)]">zon</span>
+          </p>
+          <p className="mt-2 text-sm text-[var(--text-muted)] max-w-sm">
+            A simple, colorful marketplace for buyers and sellers—focused workflows without the clutter.
+          </p>
+        </div>
+        <div>
+          <p className="font-semibold mb-2">Shop</p>
+          <ul className="space-y-1 text-sm text-[var(--text-muted)]">
+            <li>
+              <Link href="/search">Search</Link>
+            </li>
+            <li>
+              <Link href="/account">Account</Link>
+            </li>
+            <li>
+              <Link href="/cart">Cart</Link>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <p className="font-semibold mb-2">Sell</p>
+          <ul className="space-y-1 text-sm text-[var(--text-muted)]">
+            <li>
+              <Link href="/register">Open a store</Link>
+            </li>
+            <li>
+              <Link href="/seller/dashboard">Seller dashboard</Link>
+            </li>
+          </ul>
         </div>
       </div>
-      <div className="bg-mh-navy text-center py-6">
-        <Link href="/" className="text-xl font-bold text-white">
-          Lixa<span className="text-mh-brand">zon</span>
-        </Link>
-        <p className="text-gray-400 text-xs mt-2">© {new Date().getFullYear()} Lixazon — demo marketplace</p>
+      <div className="border-t border-[var(--border)] py-4 text-center text-xs text-[var(--text-muted)]">
+        © {new Date().getFullYear()} Lixazon. Demo marketplace.
       </div>
     </footer>
   );

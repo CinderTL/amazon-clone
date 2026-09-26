@@ -1,63 +1,36 @@
-import { Suspense } from "react";
-import { searchProducts } from "@/lib/actions";
-import { prisma } from "@/lib/db";
+import { listProducts } from "@/services/catalog";
 import { ProductGrid } from "@/components/ProductCard";
 import { ProductFilters } from "@/components/ProductFilters";
 
-type Props = { searchParams: Promise<Record<string, string | undefined>> };
+export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Search" };
-
-export default async function SearchPage({ searchParams }: Props) {
-  const sp = await searchParams;
-  const q = sp.q || "";
-  const categorySlug = sp.category || undefined;
-
-  const [products, categories] = await Promise.all([
-    searchProducts({
-      q: q || undefined,
-      categorySlug,
-      sort: sp.sort,
-      brand: sp.brand,
-      minPrice: sp.minPrice ? Number(sp.minPrice) : undefined,
-      maxPrice: sp.maxPrice ? Number(sp.maxPrice) : undefined,
-      inStock: sp.inStock === "1",
-    }),
-    prisma.category.findMany({ orderBy: { name: "asc" }, select: { name: true, slug: true } }),
-  ]);
-
-  const brands = [
-    ...new Set(
-      (
-        await prisma.product.findMany({
-          where: { active: true, brand: { not: null } },
-          select: { brand: true },
-        })
-      )
-        .map((p) => p.brand!)
-        .filter(Boolean)
-    ),
-  ].sort();
+export default async function SearchPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
+  const params = await searchParams;
+  const data = await listProducts({
+    q: params.q,
+    category: params.category,
+    minPrice: params.minPrice ? Number(params.minPrice) : undefined,
+    maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
+    rating: params.rating ? Number(params.rating) : undefined,
+    inStock: params.inStock === "true",
+    featured: params.featured === "true",
+    sort: params.sort || "rating",
+    page: params.page ? Number(params.page) : 1,
+  });
 
   return (
-    <div className="w-full px-3 md:px-4 py-4">
-      <h1 className="text-2xl font-bold mb-1">
-        {q ? (
-          <>
-            Results for <span className="text-mh-link">&ldquo;{q}&rdquo;</span>
-          </>
-        ) : (
-          "All products"
-        )}
+    <div className="w-full px-4 md:px-8 lg:px-12 py-8">
+      <h1 className="font-heading text-3xl font-extrabold">
+        {params.q ? `Results for “${params.q}”` : "Search"}
       </h1>
-      <p className="text-sm text-mh-muted mb-4">{products.length} results</p>
-      <div className="flex flex-col md:flex-row gap-4 items-start">
-        <Suspense fallback={<div className="w-56 shrink-0" />}>
-          <ProductFilters brands={brands} showCategory categories={categories} />
-        </Suspense>
-        <div className="flex-1 min-w-0">
-          <ProductGrid products={products} />
-        </div>
+      <p className="text-sm text-[var(--text-muted)] mt-1 mb-6">{data.total} products</p>
+      <div className="grid lg:grid-cols-[240px_1fr] gap-6">
+        <ProductFilters />
+        <ProductGrid products={data.items} />
       </div>
     </div>
   );

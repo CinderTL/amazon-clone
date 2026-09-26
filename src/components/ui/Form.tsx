@@ -1,11 +1,10 @@
-import type { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
+export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       className={cn(
-        "w-full h-9 px-3 rounded-md border border-mh-input bg-white text-mh-text outline-none focus:border-mh-brand focus:ring-1 focus:ring-mh-brand",
+        "w-full h-10 px-4 rounded-[14px] bg-[var(--surface)] border border-[var(--border)] text-[var(--text)] placeholder:text-[var(--text-muted)] outline-none focus:ring-2 focus:ring-[var(--ring)] transition",
         className
       )}
       {...props}
@@ -13,11 +12,11 @@ export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElem
   );
 }
 
-export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export function Textarea({ className, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
       className={cn(
-        "w-full min-h-24 px-3 py-2 rounded-md border border-mh-input bg-white text-mh-text outline-none focus:border-mh-brand focus:ring-1 focus:ring-mh-brand",
+        "w-full min-h-24 px-4 py-3 rounded-[14px] bg-[var(--surface)] border border-[var(--border)] text-[var(--text)] placeholder:text-[var(--text-muted)] outline-none focus:ring-2 focus:ring-[var(--ring)] transition",
         className
       )}
       {...props}
@@ -25,11 +24,15 @@ export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTex
   );
 }
 
-export function Select({ className, children, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
+export function Label({ className, ...props }: React.LabelHTMLAttributes<HTMLLabelElement>) {
+  return <label className={cn("block text-sm font-medium text-[var(--text)] mb-1.5", className)} {...props} />;
+}
+
+export function Select({ className, children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
       className={cn(
-        "w-full h-9 px-3 rounded-md border border-mh-input bg-white text-mh-text outline-none focus:border-mh-brand focus:ring-1 focus:ring-mh-brand",
+        "w-full h-10 px-3 rounded-[14px] bg-[var(--surface)] border border-[var(--border)] text-[var(--text)] outline-none focus:ring-2 focus:ring-[var(--ring)]",
         className
       )}
       {...props}
@@ -37,22 +40,4 @@ export function Select({ className, children, ...props }: SelectHTMLAttributes<H
       {children}
     </select>
   );
-}
-
-export function Label({ children, htmlFor, className }: { children: React.ReactNode; htmlFor?: string; className?: string }) {
-  return (
-    <label htmlFor={htmlFor} className={cn("block text-sm font-medium text-mh-text mb-1", className)}>
-      {children}
-    </label>
-  );
-}
-
-export function FormError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="text-sm text-mh-danger mt-2">{message}</p>;
-}
-
-export function FormSuccess({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="text-sm text-mh-success mt-2">{message}</p>;
 }
